@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 'provider_url': 'http://www.dan.me.uk',
                 'summary': "This feed is a list of Tor Node IP addresses, updated every 30 minutes.",
                 'tech_data': "There are no requirements to share any data to receive this feed.",
-                'icon': '/root/tor.png'}
+                'icon': 'images/tor.png'}
             
     feedinfo = CbFeedInfo(**feedinfo)
     feed = CbFeed(feedinfo, reports)
