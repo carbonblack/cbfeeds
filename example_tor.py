@@ -62,7 +62,7 @@ if __name__ == "__main__":
     
     feedinfo = {'name': 'tor',
                 'display_name': "Tor Exit Nodes",
-                'provider_url': 'http://www.dan.me.uk',
+                'provider_url': 'http://www.dan.me.uk/tornodes',
                 'summary': "This feed is a list of Tor Node IP addresses, updated every 30 minutes.",
                 'tech_data': "There are no requirements to share any data to receive this feed.",
                 'icon': 'images/tor.png'}
