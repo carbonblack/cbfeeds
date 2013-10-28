@@ -35,11 +35,11 @@ Each `report` has report metadata and a list of IOCs.
 
 | name  | status | description | 
 | ----- | -------|-------------| 
-| `name`         | REQUIRED | internal name, must be unique per Carbon Black server. | 
-| `display_name` | REQUIRED | Display name for user interfaces | 
-| `provider_url` | REQUIRED | Link to view more information about this feed. | 
+| `name`         | REQUIRED | Internal name; must be unique per Carbon Black server. | 
+| `display_name` | REQUIRED | Display name for the user interface | 
+| `provider_url` | REQUIRED | Human-consumpable link to view more information about this feed. | 
 | `summary`      | REQUIRED | A short description of this feed. | 
-| `tech_data`    | REQUIRED | More detailed technical description, usually details data sent to other systems. (if any) | 
+| `tech_data`    | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
 | `icon`         | OPTIONAL | A base64 encoded version of the image to use in the user interface | 
 
 An example `feedinfo` structure, from the example_tor.py script:
@@ -62,11 +62,11 @@ A `report` is a JSON structure with the following entries:
 
 | name  | status | description | 
 | ----- | -------|-------------| 
-| `timestamp`   | REQUIRED | Time this report was last updated, in seconds since epoch. | 
-| `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed. | 
-| `link`         | REQUIRED | Link to view more information about this report. | 
+| `timestamp`    | REQUIRED | Time this report was last updated, in seconds since epoch (GMT). | 
+| `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed.  Must be alphanumeric. | 
+| `link`         | REQUIRED | Human-consumbable link to information about this report. | 
 | `title`        | REQUIRED | A one-line title describing this report. | 
-| `score`        | REQUIRED | The severity of this report from 0-100, with 100 more critical. | 
+| `score`        | REQUIRED | The severity of this report from 0-100, with 100 most critical. | 
 | `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report | 
 
 ### iocs
