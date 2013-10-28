@@ -6,12 +6,22 @@ TODO
 
 ## Overview
 
-Carbon Black 4.0+ ships with support for arbitrary threat intelligence feeds.  The Indicators of Compromise (IOCs) 
-contained in the feeds are compared to the sensor data as it arrives as the server.  Any activity matching an 
+Carbon Black 4.0+ ships with support for threat intelligence feeds.  The Indicators of Compromise (IOCs) 
+contained in the feeds are compared to the sensor data as it arrives on the server.  Any activity matching an 
 IOC is tagged; users can search for the tags and, optionally, sign up for immediate e-mail alerts.
 
-This allows every Carbon Black user to use of freely available threat data with zero friction.  It also allows
-users to write their own feeds, to leverage IOCs not available through the Carbon Black Alliance feeds.
+Feeds allow Carbon Black servers to use freely available threat intelligence, proprietary customer threat data,
+and provides a mechanism to feed threat indicators from on-premise analytic sources to Carbon Black for verification,
+detection, visibility and analysis.
+
+The Carbon Black 4.0 server supports three types of indicators:
+
+  * Binary MD5s
+  * IPv4 addresses
+  * DNS names
+
+The feed format, described below, is designed for simplicity.  This should make it easy to add support for feed
+data from any input source.
 
 ## Feed structure
 
