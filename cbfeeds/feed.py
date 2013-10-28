@@ -71,7 +71,13 @@ class CbFeedInfo(object):
 class CbReport(object):
     def __init__(self, **kwargs):
         # these fields are required in every feed descriptor
-        self.required = ["iocs", "date", "link", "title", "id"]
+        self.required = ["iocs", "timestamp", "link", "title", "id", "score"]
+        if "timestamp" not in kwargs:
+            kwargs["timestamp"] = int(time.mktime(time.gmtime()))
+
+        if "score" not in kwargs:
+            kwargs["score"] = 0
+
         self.data = kwargs
 
     def dump(self):

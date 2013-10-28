@@ -62,10 +62,11 @@ A `report` is a JSON structure with the following entries:
 
 | name  | status | description | 
 | ----- | -------|-------------| 
-| `date`         | REQUIRED | Time this report was last updated, in seconds since epoch. | 
+| `timestamp`   | REQUIRED | Time this report was last updated, in seconds since epoch. | 
 | `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed. | 
 | `link`         | REQUIRED | Link to view more information about this report. | 
 | `title`        | REQUIRED | A one-line title describing this report. | 
+| `score`        | REQUIRED | The severity of this report from 0-100, with 100 more critical. | 
 | `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report | 
 
 ### iocs
