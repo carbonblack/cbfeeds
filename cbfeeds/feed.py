@@ -24,6 +24,28 @@ class CbFeed(object):
     def __str__(self):
         return "CbFeed(%s)" % (self.data.get('feedinfo', "unknown"))
 
+    def _validate(self, serialized_data=None):
+        if not serialized_data:
+            # this should be identity, but just to be safe.
+            serialized_data = self.dump()
+
+        data = json.loads(serialized_data) 
+        if not "feedinfo" in data:
+            raise CbInvalidFeed("Feed missing 'feedinfo' data")
+
+        if not 'reports' in data:
+            raise CbInvalidFeed("Feed missing 'reports' structure")
+
+        # instantiate each object and validate.  Will throw
+        # exceptions on error
+        fi = CbFeedInfo(**data["feedinfo"])
+        fi._validate()
+        for rep in data["reports"]:
+            report = CbReport(**rep)
+            report._validate() 
+
+        return True
+
 class CbFeedInfo(object):
     def __init__(self, **kwargs):
         # these fields are required in every feed descriptor
@@ -41,7 +63,7 @@ class CbFeedInfo(object):
 
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
-            raise CbInvalidFeed("Feed missing required field(s): %s" % missing_fields)
+            raise CbInvalidFeed("FeedInfo missing required field(s): %s" % missing_fields)
 
         # if icon exists and points to a file, grab the bytes
         # and base64 them
@@ -61,6 +83,8 @@ class CbFeedInfo(object):
             except TypeError, err:
                 raise CbIconError("Icon must either be path or base64 data.  \
                                     Path does not exist and base64 decode failed with: %s" % err)
+
+        return True
 
     def __str__(self):
         return "CbFeed(%s)" % (self.data.get("name", "unnamed"))
@@ -85,9 +109,38 @@ class CbReport(object):
         return self.data
 
     def _validate(self):
+        # validate we have all required keys
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidReport("Report missing required field(s): %s" % missing_fields)
+
+        # validate there is at least one IOC for each report
+        if not all([len(x) >= 1 for self.data[x] in self.data['iocs']]):
+            raise CbInvalidReport("Report IOC list with zero length in report %s" % self.data["id"])
+
+        # validate IOC contents
+        iocs = self.data['iocs']
+
+        # validate all md5 fields are 32 characters and just alphanumeric
+        if not all([(len(md5) == 32 and md5.isalnum()) for md5 in iocs.get("md5", [])]):
+            raise CbInvalidReport("Malformed md5 in IOC list for report %s: %s" % (self.data["id"], repr(self.data)))
+
+        # validate all IPv4 fields pass socket.inet_ntoa()
+        import socket
+        try:
+            [socket.inet_aton(ip) for ip in iocs.get("ipv4", [])]
+        except socket.error:
+            raise CbInvalidReport("Malformed IPv4 addr in IOC list for report %s: %s" % (self.data["id"], repr(self.data)))
+
+        # validate all lowercased domains have just A-Z, a-z, 0-9, . and -
+        import string
+        # 63 chars allowed in dns, plus "."
+        allowed_chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + "-" + "."
+        for domain in iocs.get("dns", []):
+            if not all([c in allowed_chars for c in domain]):
+                raise CbInvalidReport("Malformed domain name in IOC list for report %s: %s" % (self.data["id"], repr(self.data)))
+
+        return True
 
     def __str__(self):
         return "CbReport(%s)" % (self.data.get("title", self.data.get("id", '') ) )

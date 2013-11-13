@@ -1,0 +1,6 @@
+
+0.5.1 - 13 Nov 13
+	- added additional feed validation 
+
+0.5 - 1 Nov 13 
+	- initial release
