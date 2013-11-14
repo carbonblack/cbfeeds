@@ -1,4 +1,5 @@
 # stdlib imports
+import sys
 import time
 from HTMLParser import HTMLParser
 from datetime import timedelta
@@ -56,7 +57,7 @@ def build_reports(nodes):
         reports.append(CbReport(**fields))
     return reports
 
-if __name__ == "__main__":
+def create():
     nodes = get_tor_nodes()
     reports = build_reports(nodes)
     
@@ -69,4 +70,13 @@ if __name__ == "__main__":
             
     feedinfo = CbFeedInfo(**feedinfo)
     feed = CbFeed(feedinfo, reports)
-    open("tor", "w").write(feed.dump()) 
+
+    return feed.dump()
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print "usage: %s [outfile]" % sys.argv[0]
+        sys.exit(0)
+    bytes = create()
+    open(sys.argv[1], "w").write(bytes)
+    
