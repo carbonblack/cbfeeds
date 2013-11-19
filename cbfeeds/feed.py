@@ -65,6 +65,10 @@ class CbFeedInfo(object):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidFeed("FeedInfo missing required field(s): %s" % missing_fields)
 
+        # validate shortname of this field is just a-z
+        if not self.data["name"].isalpha():
+            raise CbInvalidFeed("Feed name %s may only contain a-z, A-Z" % self.data["name"])
+
         # if icon exists and points to a file, grab the bytes
         # and base64 them
         if "icon" in self.data and os.path.exists(self.data["icon"]):
@@ -114,9 +118,18 @@ class CbReport(object):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidReport("Report missing required field(s): %s" % missing_fields)
 
-        # validate there is at least one IOC for each report
-        if not all([len(x) >= 1 for self.data[x] in self.data['iocs']]):
-            raise CbInvalidReport("Report IOC list with zero length in report %s" % self.data["id"])
+        # validate score is integer between 0 and 100
+        try:
+            int(self.data["score"])
+        except ValueError:
+            raise CbInvalidReport("Non-integer score %s in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+        
+        if self.data["score"] < 0 or self.data["score"] > 100:
+            raise CbInvalidReport("Score %s out of range 0-100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+
+        # validate there is at least one IOC for each report and each IOC entry has at least one entry
+        if not all([len(self.data["iocs"][ioc]) >= 1 for ioc in self.data['iocs']]):
+            raise CbInvalidReport("Report IOC list with zero length in report %s: %s" % (self.data["id"], repr(self.data)))
 
         # validate IOC contents
         iocs = self.data['iocs']
