@@ -65,7 +65,8 @@ def build_reports(options):
               'timestamp': int(time.mktime(time.gmtime())),
               'link': options.url,
               'id': options.report,
-              'title': options.report}
+              'title': options.report,
+              'score': 100}
 
     if len(ips) > 0:
         fields['iocs']['ipv4'] = ips
