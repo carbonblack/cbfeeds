@@ -58,8 +58,6 @@ def build_reports(options):
             elif -1 != raw_ioc.find("."):
                 domains.append(raw_ioc) 
 
-    print ips
- 
     fields = {'iocs': {
                       },
               'timestamp': int(time.mktime(time.gmtime())),
