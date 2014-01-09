@@ -1,9 +1,5 @@
 # Carbon Black Alliance Feeds
 
-## Table of contents
-
-TODO
-
 ## Overview
 
 Carbon Black 4.0+ ships with support for threat intelligence feeds.  The Indicators of Compromise (IOCs) 
