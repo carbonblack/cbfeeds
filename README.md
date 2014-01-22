@@ -96,7 +96,7 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
 ```
   "reports": [
     {
-      "date": 1380773388,
+      "timestamp": 1380773388,
       "iocs": {
         "ipv4": [
           "100.2.142.8"
@@ -107,7 +107,7 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
       "title": "As of Wed Oct  2 20:09:48 2013 GMT, 100.2.142.8 has been a TOR exit for 26 days, 0:44:42. Contact: Adam Langley <agl@imperialviolet.org>"
     },
     {
-      "date": 1380773388,
+      "timestamp": 1380773388,
       "iocs": {
         "ipv4": [
           "100.4.7.69"
