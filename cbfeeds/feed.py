@@ -126,7 +126,7 @@ class CbReport(object):
             raise CbInvalidReport("Non-integer score %s in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
         
         if self.data["score"] < -100 or self.data["score"] > 100:
-            raise CbInvalidReport("Score %s out of range -100i to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Score %s out of range -100 to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
 
         if not self.allow_negative_scores and self.data["score"] < 0:
             raise CbInvalidReport("Score %s out of range 0 to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
