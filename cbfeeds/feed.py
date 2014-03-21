@@ -65,9 +65,9 @@ class CbFeedInfo(object):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidFeed("FeedInfo missing required field(s): %s" % missing_fields)
 
-        # validate shortname of this field is just a-z
-        if not self.data["name"].isalpha():
-            raise CbInvalidFeed("Feed name %s may only contain a-z, A-Z" % self.data["name"])
+        # validate shortname of this field is just a-z and 0-9, with at least one character
+        if not self.data["name"].isalnum():
+            raise CbInvalidFeed("Feed name %s may only contain a-z, A-Z, 0-9 and must have one character" % self.data["name"])
 
         # if icon exists and points to a file, grab the bytes
         # and base64 them
@@ -97,7 +97,8 @@ class CbFeedInfo(object):
         return repr(self.data)
 
 class CbReport(object):
-    def __init__(self, **kwargs):
+    def __init__(self, allow_negative_scores=False, **kwargs):
+        self.allow_negative_scores=allow_negative_scores
         # these fields are required in every feed descriptor
         self.required = ["iocs", "timestamp", "link", "title", "id", "score"]
         if "timestamp" not in kwargs:
@@ -118,14 +119,17 @@ class CbReport(object):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidReport("Report missing required field(s): %s" % missing_fields)
 
-        # validate score is integer between 0 and 100
+        # validate score is integer between -100 (if so specified) or 0 and 100
         try:
             int(self.data["score"])
         except ValueError:
             raise CbInvalidReport("Non-integer score %s in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
         
-        if self.data["score"] < 0 or self.data["score"] > 100:
-            raise CbInvalidReport("Score %s out of range 0-100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+        if self.data["score"] < -100 or self.data["score"] > 100:
+            raise CbInvalidReport("Score %s out of range -100 to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+
+        if not self.allow_negative_scores and self.data["score"] < 0:
+            raise CbInvalidReport("Score %s out of range 0 to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
 
         # validate there is at least one IOC for each report and each IOC entry has at least one entry
         if not all([len(self.data["iocs"][ioc]) >= 1 for ioc in self.data['iocs']]):
@@ -147,7 +151,7 @@ class CbReport(object):
 
         # validate all lowercased domains have just A-Z, a-z, 0-9, . and -
         import string
-        # 63 chars allowed in dns, plus "."
+        # 255 chars allowed in dns; all must be alphanumeric, -, .
         allowed_chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + "-" + "."
         for domain in iocs.get("dns", []):
             if not all([c in allowed_chars for c in domain]):

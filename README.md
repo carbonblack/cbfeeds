@@ -4,13 +4,13 @@
 
 Carbon Black 4.0+ ships with support for threat intelligence feeds.  The Indicators of Compromise (IOCs) 
 contained in the feeds are compared to the sensor data as it arrives on the server.  Any activity matching an 
-IOC is tagged; users can search for the tags and, optionally, sign up for immediate e-mail alerts.
+IOC is tagged; users can search for the tags and, optionally, register for e-mail alerts.
 
 Feeds allow Carbon Black servers to use freely available threat intelligence, proprietary customer threat data,
 and provides a mechanism to feed threat indicators from on-premise analytic sources to Carbon Black for verification,
 detection, visibility and analysis.
 
-The Carbon Black 4.0 server supports three types of indicators:
+The Carbon Black 4.0+ server supports three types of indicators:
 
   * Binary MD5s
   * IPv4 addresses
@@ -41,12 +41,16 @@ Each `report` has report metadata and a list of IOCs.
 
 | name  | status | description | 
 | ----- | -------|-------------| 
-| `name`         | REQUIRED | Internal name; must be unique per Carbon Black server. | 
-| `display_name` | REQUIRED | Display name for the user interface | 
+| `name`         | REQUIRED | Internal name; must not include spaces or special characters.  See Notes. | 
+| `display_name` | REQUIRED | Display name for the user interface. | 
 | `provider_url` | REQUIRED | Human-consumpable link to view more information about this feed. | 
 | `summary`      | REQUIRED | A short description of this feed. | 
 | `tech_data`    | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
 | `icon`         | OPTIONAL | A base64 encoded version of the image to use in the user interface | 
+
+Notes:
+
+The 'name' field must not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
 
 An example `feedinfo` structure, from the example_tor.py script:
 
