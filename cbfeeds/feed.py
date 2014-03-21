@@ -15,7 +15,9 @@ class CbFeed(object):
         self.data = {'feedinfo': feedinfo,
                      'reports': reports}
 
-    def dump(self):
+    def dump(self, validate=True):
+        if validate:
+            self._validate()
         return json.dumps(self.data, cls=CbJSONEncoder, indent=2)
 
     def __repr__(self):
@@ -27,7 +29,7 @@ class CbFeed(object):
     def _validate(self, serialized_data=None):
         if not serialized_data:
             # this should be identity, but just to be safe.
-            serialized_data = self.dump()
+            serialized_data = self.dump(validate=False)
 
         data = json.loads(serialized_data) 
         if not "feedinfo" in data:
@@ -104,9 +106,6 @@ class CbReport(object):
         if "timestamp" not in kwargs:
             kwargs["timestamp"] = int(time.mktime(time.gmtime()))
 
-        if "score" not in kwargs:
-            kwargs["score"] = 0
-
         self.data = kwargs
 
     def dump(self):
@@ -114,6 +113,7 @@ class CbReport(object):
         return self.data
 
     def _validate(self):
+
         # validate we have all required keys
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
@@ -123,31 +123,31 @@ class CbReport(object):
         try:
             int(self.data["score"])
         except ValueError:
-            raise CbInvalidReport("Non-integer score %s in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Non-integer score %s in report %s" % (self.data["score"], self.data["id"]))
         
         if self.data["score"] < -100 or self.data["score"] > 100:
-            raise CbInvalidReport("Score %s out of range -100 to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Score %s out of range -100 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
         if not self.allow_negative_scores and self.data["score"] < 0:
-            raise CbInvalidReport("Score %s out of range 0 to 100 in report %s: %s" % (self.data["score"], self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Score %s out of range 0 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
         # validate there is at least one IOC for each report and each IOC entry has at least one entry
         if not all([len(self.data["iocs"][ioc]) >= 1 for ioc in self.data['iocs']]):
-            raise CbInvalidReport("Report IOC list with zero length in report %s: %s" % (self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Report IOC list with zero length in report %s" % (self.data["id"]))
 
         # validate IOC contents
         iocs = self.data['iocs']
 
         # validate all md5 fields are 32 characters and just alphanumeric
         if not all([(len(md5) == 32 and md5.isalnum()) for md5 in iocs.get("md5", [])]):
-            raise CbInvalidReport("Malformed md5 in IOC list for report %s: %s" % (self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Malformed md5 in IOC list for report %s" % (self.data["id"]))
 
         # validate all IPv4 fields pass socket.inet_ntoa()
         import socket
         try:
             [socket.inet_aton(ip) for ip in iocs.get("ipv4", [])]
         except socket.error:
-            raise CbInvalidReport("Malformed IPv4 addr in IOC list for report %s: %s" % (self.data["id"], repr(self.data)))
+            raise CbInvalidReport("Malformed IPv4 addr in IOC list for report %s" % (self.data["id"]))
 
         # validate all lowercased domains have just A-Z, a-z, 0-9, . and -
         import string
@@ -155,7 +155,7 @@ class CbReport(object):
         allowed_chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + "-" + "."
         for domain in iocs.get("dns", []):
             if not all([c in allowed_chars for c in domain]):
-                raise CbInvalidReport("Malformed domain name in IOC list for report %s: %s" % (self.data["id"], repr(self.data)))
+                raise CbInvalidReport("Malformed domain name in IOC list for report %s" % (self.data["id"]))
 
         return True
 
