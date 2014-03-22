@@ -17,7 +17,7 @@ class CbFeed(object):
 
     def dump(self, validate=True):
         if validate:
-            self._validate()
+            self.validate()
         return json.dumps(self.data, cls=CbJSONEncoder, indent=2)
 
     def __repr__(self):
@@ -26,7 +26,7 @@ class CbFeed(object):
     def __str__(self):
         return "CbFeed(%s)" % (self.data.get('feedinfo', "unknown"))
 
-    def _validate(self, serialized_data=None):
+    def validate(self, pedantic=False, serialized_data=None):
         if not serialized_data:
             # this should be identity, but just to be safe.
             serialized_data = self.dump(validate=False)
@@ -41,10 +41,10 @@ class CbFeed(object):
         # instantiate each object and validate.  Will throw
         # exceptions on error
         fi = CbFeedInfo(**data["feedinfo"])
-        fi._validate()
+        fi.validate(pedantic=pedantic)
         for rep in data["reports"]:
             report = CbReport(**rep)
-            report._validate() 
+            report.validate(pedantic=pedantic) 
 
         return True
 
@@ -57,10 +57,10 @@ class CbFeedInfo(object):
         self.data["version"] = 1        
 
     def dump(self):
-        self._validate()
+        self.validate()
         return self.data
 
-    def _validate(self):
+    def validate(self, pedantic=False):
         """ a set of checks to validate data before we export the feed"""
 
         if not all([x in self.data.keys() for x in self.required]):
@@ -100,44 +100,63 @@ class CbFeedInfo(object):
 
 class CbReport(object):
     def __init__(self, allow_negative_scores=False, **kwargs):
+        
+        # negative scores introduced in CB 4.2
         self.allow_negative_scores=allow_negative_scores
-        # these fields are required in every feed descriptor
+        
+        # these fields are required in every report descriptor
         self.required = ["iocs", "timestamp", "link", "title", "id", "score"]
+        
+        # valid IOC types are "md5", "ipv4", "dns"
+        self.valid_ioc_types = ["md5", "ipv4", "dns"]
+
         if "timestamp" not in kwargs:
             kwargs["timestamp"] = int(time.mktime(time.gmtime()))
 
         self.data = kwargs
 
     def dump(self):
-        self._validate()
+        self.validate()
         return self.data
 
-    def _validate(self):
+    def validate(self, pedantic=False):
 
         # validate we have all required keys
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidReport("Report missing required field(s): %s" % missing_fields)
 
+        # (pedantically) validate that no extra keys are present
+        if pedantic and len(self.data.keys()) > len(self.required):
+            raise CbInvalidReport("Report contains extra keys: %s" % (set(self.data.keys()) - set(self.required)))
+
         # validate score is integer between -100 (if so specified) or 0 and 100
         try:
             int(self.data["score"])
         except ValueError:
-            raise CbInvalidReport("Non-integer score %s in report %s" % (self.data["score"], self.data["id"]))
+            raise CbInvalidReport("Report has non-integer score %s in report %s" % (self.data["score"], self.data["id"]))
         
         if self.data["score"] < -100 or self.data["score"] > 100:
-            raise CbInvalidReport("Score %s out of range -100 to 100 in report %s" % (self.data["score"], self.data["id"]))
+            raise CbInvalidReport("Report score %s out of range -100 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
         if not self.allow_negative_scores and self.data["score"] < 0:
-            raise CbInvalidReport("Score %s out of range 0 to 100 in report %s" % (self.data["score"], self.data["id"]))
+            raise CbInvalidReport("Report score %s out of range 0 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
         # validate there is at least one IOC for each report and each IOC entry has at least one entry
         if not all([len(self.data["iocs"][ioc]) >= 1 for ioc in self.data['iocs']]):
             raise CbInvalidReport("Report IOC list with zero length in report %s" % (self.data["id"]))
 
-        # validate IOC contents
+        # convenience variable 
         iocs = self.data['iocs']
 
+        # validate that there are at least one type of ioc present
+        if len(iocs.keys()) == 0:
+            raise CbInvalidReport("Report with no IOCs in report %s" % (self.data["id"])) 
+
+        # (pedantically) validate that no extra keys are present
+        if pedantic and len(set(iocs.keys()) - set(self.valid_ioc_types)) > 0:
+            raise CbInvalidReport("Report IOCs section contains extra keys: %s" % (set(iocs.keys()) - set(self.valid_ioc_types)))
+        
         # validate all md5 fields are 32 characters and just alphanumeric
         if not all([(len(md5) == 32 and md5.isalnum()) for md5 in iocs.get("md5", [])]):
             raise CbInvalidReport("Malformed md5 in IOC list for report %s" % (self.data["id"]))

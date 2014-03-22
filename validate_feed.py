@@ -49,10 +49,13 @@ def validate_feed(feed):
     #
     feed = cbfeeds.CbFeed(feed["feedinfo"], feed["reports"])
 
-    # serialize the feed
-    # this actually does the feed validation
+    # validate the feed
+    # this validates that all required fields are present, and that
+    #   all required values are within valid ranges
     #
-    feed.dump() 
+    feed.validate(pedantic=False) 
+    
+    return feed
 
 if __name__ == "__main__":
 
@@ -71,6 +74,7 @@ if __name__ == "__main__":
         print "-> Details:"
         print
         print e
+        sys.exit(0)
 
     try:
         feed = validate_json(contents)
@@ -80,14 +84,26 @@ if __name__ == "__main__":
         print "-> Details:"
         print
         print e
+        sys.exit(0)
 
     try:
-        validate_feed(feed)
+        feed = validate_feed(feed)
         print "-> Validated that the feed file includes all necessary CB elements"
         print "-> Validated that all element values are within CB feed requirements"
-        print
     except Exception, e:
         print "-> Unable to validate that the file is a valid CB feed"
         print "-> Details:"
         print
         print e
+        sys.exit(0)
+
+    try:
+        feed.validate(pedantic=True)
+        print "-> Validated that the feed includes no non-CB elements"
+        print
+    except Exception, e:
+        print "-> Unable to validate that the feed includes no non-CB elements"
+        print "-> Details:"
+        print 
+        print e
+        sys.exit(0)

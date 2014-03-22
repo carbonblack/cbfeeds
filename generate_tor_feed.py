@@ -45,6 +45,7 @@ def build_reports(nodes):
         fields = {'iocs': {
                               'ipv4': [node['ip'], ]
                            },
+                   'score': 0,
                    'timestamp': int(time.mktime(time.gmtime())),
                    'link': 'http://www.torproject.org',
                    'id': "TOR-Node-%s" % node['ip'],
