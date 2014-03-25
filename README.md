@@ -1,4 +1,4 @@
-# Carbon Black Alliance Feeds
+# Carbon Black Feeds
 
 ## Overview
 
@@ -16,10 +16,61 @@ The Carbon Black 4.0+ server supports three types of indicators:
   * IPv4 addresses
   * DNS names
 
-The feed format, described below, is designed for simplicity.  This should make it easy to add support for feed
-data from any input source.
+The feed format, described in the "Feed Structure" section below, is designed for simplicity.  This should make it
+easy to add support for feed data from any input source.
 
-## Feed structure
+## Using the Carbon Black Feeds API
+
+The Carbon Black Feeds API (CBFAPI) is found on github at:
+
+  https://github.com/carbonblack/cbfeeds
+
+The CBFAPI is a collection of documentation, example scripts, and a helper library to help create and validate Carbon
+Black feeds.  It is not required in order to build a Carbon Black feed - a feed can be created in any language that
+allows for building JSON, or even built by hand.  The feed file itself must match the feed structure, or schema, 
+defined in the "Feed Structure" section below.
+
+### Getting started with CBFAPI
+
+#### install git as needed
+
+    [root@localhost carbonblack]# yum install git
+    ...
+
+#### clone the github cbfeed repository:
+
+    [root@localhost carbonblack]# git clone https://github.com/carbonblack/cbfeeds.git
+    Initialized empty Git repository in /root/repos/carbonblack/cbfeeds/.git/
+    remote: Reusing existing pack: 80, done.
+    remote: Counting objects: 25, done.
+    remote: Compressing objects: 100% (25/25), done.
+    Receiving objects: 100% (105/105), 38.03 KiB | 17 KiB/s, done.
+    Resolving deltas: 100% (50/50), done.
+    remote: Total 105 (delta 10), reused 0 (delta 0)
+
+#### navigate to the newly-created cbfeeds directory
+
+    [root@localhost carbonblack]# ls
+    cbfeeds
+    [root@localhost carbonblack]# cd cbfeeds/
+    [root@localhost cbfeeds]# ls
+    cbfeeds  generate_feed_from_raw_iocs.py  generate_tor_feed.py  images  README.md  setup.py  validate_feed.py
+
+#### use the example "generate_tor_feed.py" script to generate a feed from live tor egress IPs
+
+    [root@localhost cbfeeds]# python generate_tor_feed.py example_tor_feed.feed
+    [root@localhost cbfeeds]# ls -l example_tor_feed.feed 
+    -rw-r--r--. 1 root root 2179084 Mar 25 08:09 example_tor_feed.feed
+
+#### use the example "validate_feed.py" script to validate the tor feed (or a feed of your choosing)
+
+    [root@localhost cbfeeds]# python validate_feed.py --feedfile example_tor_feed.feed 
+    -> Validated that file exists and is readable
+    -> Validated that feed file is valid JSON
+    -> Validated that the feed file includes all necessary CB elements
+    -> Validated that all element values are within CB feed 
+
+## Feed Structure
 
 * Feed: a Carbon Black feed
   * FeedInfo: Feed metadata: name, description, etc
