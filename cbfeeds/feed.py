@@ -180,6 +180,8 @@ class CbReport(object):
         # 255 chars allowed in dns; all must be alphanumeric, -, .
         allowed_chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + "-" + "."
         for domain in iocs.get("dns", []):
+            if len(domain) > 255:
+                raise CbInvalidReport("Excessively long domain name (%s) in IOC list for report %s" % (domain, self.data["id"]))
             if not all([c in allowed_chars for c in domain]):
                 raise CbInvalidReport("Malformed domain name (%s) in IOC list for report %s" % (domain, self.data["id"]))
             labels = domain.split('.')
