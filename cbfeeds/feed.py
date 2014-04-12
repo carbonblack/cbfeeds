@@ -157,24 +157,39 @@ class CbReport(object):
         if pedantic and len(set(iocs.keys()) - set(self.valid_ioc_types)) > 0:
             raise CbInvalidReport("Report IOCs section contains extra keys: %s" % (set(iocs.keys()) - set(self.valid_ioc_types)))
         
-        # validate all md5 fields are 32 characters and just alphanumeric
-        if not all([(len(md5) == 32 and md5.isalnum()) for md5 in iocs.get("md5", [])]):
-            raise CbInvalidReport("Malformed md5 in IOC list for report %s" % (self.data["id"]))
+        # validate all md5 fields are 32 characters, just alphanumeric, and 
+        # do not include [g-z] and [G-Z] meet the alphanumeric criteria but are not valid in a md5
+        for md5 in iocs.get("md5", []):
+            if 32 != len(md5):
+                raise CbInvalidReport("Invalid md5 length for md5 (%s) for report %s" % (md5, self.data["id"]))
+            if not md5.isalnum():
+                raise CbInvalidReport("Malformed md5 (%s) in IOC list for report %s" % (md5, self.data["id"]))
+            for c in "ghijklmnopqrstuvwxyz":
+                if c in md5 or c.upper() in md5:
+                    raise CbInvalidReport("Malformed md5 (%s) in IOC list for report %s" % (md5, self.data["id"])) 
 
         # validate all IPv4 fields pass socket.inet_ntoa()
         import socket
         try:
             [socket.inet_aton(ip) for ip in iocs.get("ipv4", [])]
         except socket.error:
-            raise CbInvalidReport("Malformed IPv4 addr in IOC list for report %s" % (self.data["id"]))
+            raise CbInvalidReport("Malformed IPv4 (%s) addr in IOC list for report %s" % (ip, self.data["id"]))
 
         # validate all lowercased domains have just A-Z, a-z, 0-9, . and -
         import string
         # 255 chars allowed in dns; all must be alphanumeric, -, .
         allowed_chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + "-" + "."
         for domain in iocs.get("dns", []):
+            if len(domain) > 255:
+                raise CbInvalidReport("Excessively long domain name (%s) in IOC list for report %s" % (domain, self.data["id"]))
             if not all([c in allowed_chars for c in domain]):
-                raise CbInvalidReport("Malformed domain name in IOC list for report %s" % (self.data["id"]))
+                raise CbInvalidReport("Malformed domain name (%s) in IOC list for report %s" % (domain, self.data["id"]))
+            labels = domain.split('.')
+            if 0 == len(labels):
+                raise CbInvalidReport("Empty domain name in IOC list for report %s" % (self.data["id"]))
+            for label in labels:
+                if len(label) < 1 or len(label) > 63:
+                    raise CbInvalidReport("Invalid label length (%s) in domain name (%s) for report %s" % (label, domain, self.data["id"]))
 
         return True
 
