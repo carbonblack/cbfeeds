@@ -26,7 +26,23 @@ class CbFeed(object):
     def __str__(self):
         return "CbFeed(%s)" % (self.data.get('feedinfo', "unknown"))
 
+    def iter_iocs(self):
+        """
+        yields all iocs in the feed
+        """
+        data = json.loads(self.dump(validate=False))
+        for report in data["reports"]:
+            for md5 in report.get("iocs", {}).get("md5", []):
+                yield {"type": "md5", "ioc": md5, "report_id": report.get("id", "")}
+            for ip in report.get("iocs", {}).get("ipv4", []):
+                yield {"type": "ipv4", "ioc": ip, "report_id": report.get("id", "")}
+            for domain in report.get("iocs", {}).get("dns", []):
+                yield {"type": "dns", "ioc": domain, "report_id": report.get("id", "")}
+
     def validate(self, pedantic=False, serialized_data=None):
+        """
+        @param[in] pedantic - when set, perform strict validation
+        """
         if not serialized_data:
             # this should be identity, but just to be safe.
             serialized_data = self.dump(validate=False)
@@ -46,13 +62,11 @@ class CbFeed(object):
             report = CbReport(**rep)
             report.validate(pedantic=pedantic) 
 
-        return True
-
 class CbFeedInfo(object):
     def __init__(self, **kwargs):
         # these fields are required in every feed descriptor
         self.required = ["name", "display_name", "version",
-                        "summary", "tech_data", "provider_url"]
+                         "summary", "tech_data", "provider_url"]
         self.data = kwargs
         self.data["version"] = 1        
 
@@ -102,6 +116,7 @@ class CbReport(object):
     def __init__(self, allow_negative_scores=False, **kwargs):
         
         # negative scores introduced in CB 4.2
+        # negative scores indicate a measure of "goodness" versus "badness"
         self.allow_negative_scores=allow_negative_scores
         
         # these fields are required in every report descriptor

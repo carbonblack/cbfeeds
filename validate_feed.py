@@ -1,14 +1,18 @@
 import re
 import sys
 import time
-import urllib
 import json
-import optparse
+import urllib
 import socket
 import base64
 import cbfeeds
+import optparse
 
 def build_cli_parser():
+    """
+    generate OptionParser to handle command line switches
+    """
+
     usage = "usage: %prog [options]"
     desc = "Validate a Carbon Black feed"
 
@@ -18,6 +22,11 @@ def build_cli_parser():
                       help="Feed Filename to validate")
     parser.add_option("-p", "--pedantic", action="store_true", default=False, dest="pedantic",
                       help="Validates that no non-standard JSON elements exist")
+    parser.add_option("-e", "--exclude", action="store", default=None, dest="exclude",
+                      help="Filename of 'exclude' list - newline delimited indicators to consider invalid")
+    parser.add_option("-i", "--include", action="store", default=None, dest="include",
+                      help="Filename of 'include' list - newline delimited indicators to consider valid")
+
     return parser
 
 def validate_file(feed_filename):
@@ -58,14 +67,44 @@ def validate_feed(feed, pedantic=False):
     
     return feed
 
+def validate_against_include_exclude(feed, include, exclude):
+    """
+    ensure that no feed indicators are 'excluded' or blacklisted
+    """
+    for ioc in feed.iter_iocs():
+        if ioc["ioc"] in exclude and not ioc["ioc"] in include:
+            raise Exception(ioc)
+
+def gen_include_exclude_sets(include_filename, exclude_filename):
+    """
+    generate an include and an exclude set of indicators by
+    reading indicators from a flat, newline-delimited file
+    """
+    include = set()
+    exclude = set()
+
+    if include_filename:
+        for indicator in open(include_filename).readlines():
+            include.add(indicator.strip())
+    if exclude_filename:
+        for indicator in open(exclude_filename).readlines():
+            exclude.add(indicator.strip())
+
+    return include, exclude
+
 if __name__ == "__main__":
 
     parser = build_cli_parser()
     options, args = parser.parse_args(sys.argv)
 
     if not options.feed_filename:
-        print "-> Must specify a feed filename to validate; use the -f switch"
+        print "-> Must specify a feed filename to validate; use the -f switch or --help for usage"
         sys.exit(0)
+
+    # generate include and exclude (whitelist and blacklist) sets of indicators
+    # feed validation will fail if a feed ioc is blacklisted unless it is also whitelisted
+    #
+    include, exclude = gen_include_exclude_sets(options.include, options.exclude)
 
     try:
         contents = validate_file(options.feed_filename)
@@ -99,3 +138,11 @@ if __name__ == "__main__":
         print
         print e
         sys.exit(0)
+
+    if len(exclude) > 0 or len(include) > 0:
+        try:
+            validate_against_include_exclude(feed, include, exclude)
+            print "-> Validated against include and exclude lists"
+        except Exception, e:
+            print "-> Unable to validate against the include and exclude lists"
+            print e 
