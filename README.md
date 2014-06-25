@@ -181,10 +181,10 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
 
 Several example scripts are included in the 'example' subdirectory.  These example scripts illustrate using the Carbon Black cbfeeds API to generate Carbon Black feeds from a variety of data sources.
 
-| directory | name      | description | 
-| --------- | --------- | ------------|
-| abuse_ch  | abuse.ch  | The Swiss security blog abuse.ch tracks C&C servers for Zeus, SpyEye and Palevo malware.|
+| directory | name            | description | 
+| --------- | --------------- | ------------|
+| abuse_ch  | abuse.ch        | The Swiss security blog abuse.ch tracks C&C servers for Zeus, SpyEye and Palevo malware.|
 | isight    | iSIGHT Partners | iSIGHT Partners customers can use their API key to generate a Carbon Black feed from iSIGHT Partners cyber threat intelligence.|
 | mdl       | Malware Domain List | Malware Domain List is a non-commercial community project to track domains used by malware.|
-| raw       | raw       | Build a Carbon Black feed from a raw list of IOCs.|
-| tor       | Tor       | Provide a Carbon Black feed from a live list of Tor exit nodes provided by torproject.org| 
+| raw       | raw             | Build a Carbon Black feed from a raw list of IOCs.|
+| tor       | Tor             | Provide a Carbon Black feed from a live list of Tor exit nodes provided by torproject.org| 
