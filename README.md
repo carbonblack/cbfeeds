@@ -19,6 +19,8 @@ The Carbon Black 4.0+ server supports three types of indicators:
 The feed format, described in the "Feed Structure" section below, is designed for simplicity.  This should make it
 easy to add support for feed data from any input source.
 
+Example feed creation scripts are included.  See the 'Examples' section in this document for a listing of the examples.
+
 ## Using the Carbon Black Feeds API
 
 The Carbon Black Feeds API (CBFAPI) is found on github at:
@@ -175,3 +177,14 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
   ]
 ```
     
+## Examples 
+
+Several example scripts are included in the 'example' subdirectory.  These example scripts illustrate using the Carbon Black cbfeeds API to generate Carbon Black feeds from a variety of data sources.
+
+| directory | name      | description | 
+| --------- | --------- | ------------|
+| abuse_ch  | abuse.ch  | The Swiss security blog abuse.ch tracks C&C servers for Zeus, SpyEye and Palevo malware.|
+| isight    | iSIGHT Partners | iSIGHT Partners customers can use their API key to generate a Carbon Black feed from iSIGHT Partners cyber threat intelligence.|
+| mdl       | Malware Domain List | Malware Domain List is a non-commercial community project to track domains used by malware.|
+| raw       | raw       | Build a Carbon Black feed from a raw list of IOCs.|
+| tor       | Tor       | Provide a Carbon Black feed from a live list of Tor exit nodes provided by torproject.org| 
