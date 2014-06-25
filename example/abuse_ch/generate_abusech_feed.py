@@ -120,7 +120,7 @@ def create():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "usage: create_feed.py [outfile]"
+        print "usage: generte_abushch_feed.py [outfile]"
         sys.exit()
 
     bytes = create()
