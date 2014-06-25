@@ -9,6 +9,7 @@ import socket
 import base64
 
 # cb imports
+sys.path.insert(0, "../../")
 from cbfeeds import CbReport
 from cbfeeds import CbFeed
 from cbfeeds import CbFeedInfo
