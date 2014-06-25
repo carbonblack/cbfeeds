@@ -190,10 +190,13 @@ class CbReport(object):
         except socket.error:
             raise CbInvalidReport("Malformed IPv4 (%s) addr in IOC list for report %s" % (ip, self.data["id"]))
 
-        # validate all lowercased domains have just A-Z, a-z, 0-9, . and -
+        # validate all lowercased domains have just printable ascii
         import string
-        # 255 chars allowed in dns; all must be alphanumeric, -, .
-        allowed_chars = string.ascii_uppercase + string.ascii_lowercase + string.digits + "-" + "."
+        # 255 chars allowed in dns; all must be printables, sans control characters
+        # hostnames can only be A-Z, 0-9 and - but labels can be any printable.  See 
+        # O'Reilly's DNS and Bind Chapter 4 Section 5: 
+        #     "Names that are not host names can consist of any printable ASCII character."
+        allowed_chars = string.printable[:-6]
         for domain in iocs.get("dns", []):
             if len(domain) > 255:
                 raise CbInvalidReport("Excessively long domain name (%s) in IOC list for report %s" % (domain, self.data["id"]))
