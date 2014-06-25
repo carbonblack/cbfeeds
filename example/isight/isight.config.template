@@ -1,0 +1,19 @@
+###############################################################################
+# Carbon Black iSIGHT Partners Feed Genreator Config Template
+###############################################################################
+
+# These credentials come from iSight
+#
+iSightRemoteImportUsername=
+iSightRemoteImportPassword=
+
+iSightRemoteImportPublicKey=
+iSightRemoteImportPrivateKey=
+
+# URL of iSight REST API endpoint
+#
+iSightRemoteImportUrl=https://mysight-api.isightpartners.com/
+
+# Number of days (relative to today) to back-pull reports from
+#
+iSightRemoteImportDaysBack=80
