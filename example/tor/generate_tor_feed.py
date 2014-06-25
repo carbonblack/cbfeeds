@@ -10,6 +10,7 @@ from datetime import timedelta
 import requests
 
 # our imports
+sys.path.insert(0, "../../")
 from cbfeeds import CbReport
 from cbfeeds import CbFeed
 from cbfeeds import CbFeedInfo
