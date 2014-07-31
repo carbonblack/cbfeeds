@@ -129,7 +129,7 @@ if __name__ == "__main__":
     outfile = sys.argv[1]
     localcsv = None 
     if len(sys.argv) > 2:
-        localcsv = argv[2]
+        localcsv = sys.argv[2]
 
     bytes = create(localcsv)
     open(outfile, "w").write(bytes)
