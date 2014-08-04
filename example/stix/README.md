@@ -4,15 +4,17 @@ STIX is the Structured Threat Information eXpression, developed and curated by M
 
 The objectives of STIX are notably larger than the CB Feeds format, so a one-to-one translation is not possible.   However, for simpler STIX Package formats, it is possible to translate the STIX Package into a Carbon Black feed.
 
+*Note*: The diversity of STIX package structures can cause the translation to have unexpected results.  Send us feedback (or a pull request!) with any recommendations or improvements surfaced by your source data!  
+
 # stix_to_feed.py
 
 This script requires:
 
 * cbfeeds
 * python-stix 
-  ** Docs: http://stix.readthedocs.org/en/latest/
-  ** Github: https://github.com/STIXProject/python-stix
-  ** PyPI: https://pypi.python.org/pypi/stix/
+  * Docs: http://stix.readthedocs.org/en/latest/
+  * Github: https://github.com/STIXProject/python-stix
+  * PyPI: https://pypi.python.org/pypi/stix/
 
 Given a STIX Package or a directory of STIX Packages, it will translate all suitable indicators into a Cb Feed Report.  Example:
 
