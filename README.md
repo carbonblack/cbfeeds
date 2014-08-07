@@ -92,8 +92,8 @@ Each `report` has report metadata and a list of IOCs.
 
 `feedinfo` is a JSON structure with the following entries:
 
-| name  | status | description | 
-| ----- | -------|-------------| 
+| name           | status   | description | 
+| -------------- | -------- |-------------| 
 | `name`         | REQUIRED | Internal name; must not include spaces or special characters.  See Notes. | 
 | `display_name` | REQUIRED | Display name for the user interface. | 
 | `provider_url` | REQUIRED | Human-consumpable link to view more information about this feed. | 
@@ -123,14 +123,14 @@ An example `feedinfo` structure, from the example_tor.py script:
 
 A `report` is a JSON structure with the following entries:
 
-| name  | status | description | 
-| ----- | -------|-------------| 
-| `timestamp`    | REQUIRED | Time this report was last updated, in seconds since epoch (GMT). | 
-| `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed.  Must be alphanumeric. | 
-| `link`         | REQUIRED | Human-consumbable link to information about this report. | 
-| `title`        | REQUIRED | A one-line title describing this report. | 
-| `score`        | REQUIRED | The severity of this report from 0-100, with 100 most critical. | 
-| `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report id.  The IOC format is described below. | 
+| name           | status   | description | 
+| -------------- | -------- |-------------| 
+| `timestamp`    | REQUIRED | Time this report was last updated, in seconds since epoch (GMT).  This should always be updated whenever the content of the report changes.| 
+| `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed.  Must be alphanumeric (including no spaces).| 
+| `link`         | REQUIRED | Human-consumbable link to information about this report.| 
+| `title`        | REQUIRED | A one-line title describing this report.| 
+| `score`        | REQUIRED | The severity of this report from 0-100, with 100 most critical.| 
+| `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report id.  The IOC format is described below.| 
 
 ### iocs
 
@@ -142,11 +142,11 @@ CB 4.0 ships with feeds version `1` and supports three kinds of IOCs:
 
 `iocs` is a structure with one or more of these entries:
 
-| name  | status | description | 
-| ----- | -------|-------------| 
-| `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form | 
-| `dns`          | OPTIONAL | A list of domain names | 
-| `md5`          | OPTIONAL | A list of md5s | 
+| name           | status   | description | 
+| -------------- | -------- |-------------| 
+| `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form| 
+| `dns`          | OPTIONAL | A list of domain names| 
+| `md5`          | OPTIONAL | A list of md5s| 
 
 An example `reports` list with two `report` structures, each with one IPv4 IOC, from the example_tor.py script:
 

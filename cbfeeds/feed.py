@@ -157,6 +157,10 @@ class CbReport(object):
         if not self.allow_negative_scores and self.data["score"] < 0:
             raise CbInvalidReport("Report score %s out of range 0 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
+        # validate id of this report is just a-z and 0-9, with at least one character
+        if not self.data["id"].isalnum():
+            raise CbInvalidReport("Report ID  %s may only contain a-z, A-Z, 0-9 and must have one character" % self.data["id"])
+
         # validate there is at least one IOC for each report and each IOC entry has at least one entry
         if not all([len(self.data["iocs"][ioc]) >= 1 for ioc in self.data['iocs']]):
             raise CbInvalidReport("Report IOC list with zero length in report %s" % (self.data["id"]))

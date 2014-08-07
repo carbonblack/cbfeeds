@@ -7,12 +7,30 @@ import json
 import optparse
 import socket
 import base64
+import hashlib
 
 # cb imports
 sys.path.insert(0, "../../")
 from cbfeeds import CbReport
 from cbfeeds import CbFeed
 from cbfeeds import CbFeedInfo
+
+def gen_report_id(iocs):
+    """
+    a report id should be unique
+    because generate_feed_from_raw may be run repeatedly on the same data, it should
+    also be deterministic.
+    this routine sorts all the indicators, then hashes in order to meet these criteria
+    """
+    md5 = hashlib.md5()
+
+    # sort the iocs so that a re-order of the same set of iocs results in the same report id
+    iocs.sort()
+
+    for ioc in iocs:
+        md5.update(ioc.strip())
+
+    return md5.hexdigest()
 
 def build_reports(options):
  
@@ -63,8 +81,8 @@ def build_reports(options):
                       },
               'timestamp': int(time.mktime(time.gmtime())),
               'link': options.url,
-              'id': options.report,
               'title': options.report,
+              'id': gen_report_id(ips + domains + md5s),
               'score': 100}
 
     if len(ips) > 0:
@@ -73,7 +91,7 @@ def build_reports(options):
         fields['iocs']['dns'] = domains
     if len(md5s) > 0:
         fields['iocs']['md5'] = md5s
- 
+
     reports.append(CbReport(**fields))
 
     return reports
