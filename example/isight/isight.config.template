@@ -11,8 +11,9 @@ iSightRemoteImportPublicKey=
 iSightRemoteImportPrivateKey=
 
 # URL of iSight REST API endpoint
+# Effective 15-Oct-2014, mysight-api.isightpartners.com is deprecated in favor of api.isightpartners.com
 #
-iSightRemoteImportUrl=https://mysight-api.isightpartners.com/
+iSightRemoteImportUrl=https://api.isightpartners.com/
 
 # Number of days (relative to today) to back-pull reports from
 #
