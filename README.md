@@ -129,7 +129,7 @@ A `report` is a JSON structure with the following entries:
 | `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed.  Must be alphanumeric (including no spaces).| 
 | `link`         | REQUIRED | Human-consumbable link to information about this report.| 
 | `title`        | REQUIRED | A one-line title describing this report.| 
-| `score`        | REQUIRED | The severity of this report from 0-100, with 100 most critical.| 
+| `score`        | REQUIRED | The severity of this report from -100 to 100, with 100 most critical.| 
 | `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report id.  The IOC format is described below.| 
 
 ### iocs
