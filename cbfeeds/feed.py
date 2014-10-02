@@ -129,8 +129,8 @@ class CbReport(object):
         # these fields are required in every report descriptor
         self.required = ["iocs", "timestamp", "link", "title", "id", "score"]
 
-        # valid IOC types are "md5", "ipv4", "dns"
-        self.valid_ioc_types = ["md5", "ipv4", "dns"]
+        # valid IOC types are "md5", "ipv4", "dns", "query"
+        self.valid_ioc_types = ["md5", "ipv4", "dns", "query"]
 
         if "timestamp" not in kwargs:
             kwargs["timestamp"] = int(time.mktime(time.gmtime()))
