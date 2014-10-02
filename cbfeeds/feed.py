@@ -132,6 +132,9 @@ class CbReport(object):
         # valid IOC types are "md5", "ipv4", "dns", "query"
         self.valid_ioc_types = ["md5", "ipv4", "dns", "query"]
 
+        # valid index_type options for "query" IOC
+        self.valid_query_ioc_types = ["events", "modules"]
+
         if "timestamp" not in kwargs:
             kwargs["timestamp"] = int(time.mktime(time.gmtime()))
 
@@ -169,7 +172,7 @@ class CbReport(object):
                 "Report score %s out of range 0 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
         # validate id of this report is just a-z and 0-9 and - and ., with at least one character
-        if not re.match("^[a-zA-Z0-9-.]+$", self.data["id"]):
+        if not re.match("^[a-zA-Z0-9-_.]+$", self.data["id"]):
             raise CbInvalidReport(
                 "Report ID  %s may only contain a-z, A-Z, 0-9, - and must have one character" % self.data["id"])
 
@@ -188,6 +191,21 @@ class CbReport(object):
         if pedantic and len(set(iocs.keys()) - set(self.valid_ioc_types)) > 0:
             raise CbInvalidReport(
                 "Report IOCs section contains extra keys: %s" % (set(iocs.keys()) - set(self.valid_ioc_types)))
+
+        # Let us check and make sure that for "query" ioc type does not contain other types of ioc
+        query_ioc = "query" in iocs.keys()
+        if query_ioc and len(iocs.keys()) > 1:
+            raise CbInvalidReport(
+                "Report IOCs section for \"query\" contains extra keys: %s for report %s" %
+                (set(iocs.keys()), self.data["id"]))
+
+        if query_ioc:
+            iocs_query = iocs["query"][0]
+            if "index_type" in iocs_query.keys():
+                if not iocs_query.get("index_type", None) in self.valid_query_ioc_types:
+                    raise CbInvalidReport(
+                        "Report IOCs section for \"query\" contains invalid index_type: %s for report %s" %
+                        (iocs_query.get("index_type", None), self.data["id"]))
 
         # validate all md5 fields are 32 characters, just alphanumeric, and 
         # do not include [g-z] and [G-Z] meet the alphanumeric criteria but are not valid in a md5
