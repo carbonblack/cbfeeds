@@ -168,7 +168,7 @@ class CbReport(object):
             raise CbInvalidReport(
                 "Report score %s out of range 0 to 100 in report %s" % (self.data["score"], self.data["id"]))
 
-        # validate id of this report is just a-z and 0-9 and -, with at least one character
+        # validate id of this report is just a-z and 0-9 and - and ., with at least one character
         if not re.match("^[a-zA-Z0-9-.]+$", self.data["id"]):
             raise CbInvalidReport(
                 "Report ID  %s may only contain a-z, A-Z, 0-9, - and must have one character" % self.data["id"])
