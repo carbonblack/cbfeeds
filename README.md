@@ -139,6 +139,7 @@ CB 4.0 ships with feeds version `1` and supports three kinds of IOCs:
 * IPv4 addresses
 * domain names
 * md5s
+* query - this contains query related to modules or events
 
 `iocs` is a structure with one or more of these entries:
 
@@ -146,7 +147,8 @@ CB 4.0 ships with feeds version `1` and supports three kinds of IOCs:
 | -------------- | -------- |-------------| 
 | `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form| 
 | `dns`          | OPTIONAL | A list of domain names| 
-| `md5`          | OPTIONAL | A list of md5s| 
+| `md5`          | OPTIONAL | A list of md5s|
+| `query`		 | OPTIONAL | A query of type "events" or "modules"| 
 
 An example `reports` list with two `report` structures, each with one IPv4 IOC, from the example_tor.py script:
 
@@ -175,6 +177,46 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
       "title": "As of Wed Oct  2 20:09:48 2013 GMT, 100.4.7.69 has been a TOR exit for 61 days, 2:07:23. Contact: GPG KeyID: 0x1F40CBDC Jeremy <jeremy@acjlaw.net>"
     }
   ]
+```
+Another example with "query" IOC:
+
+```
+"reports": 
+[
+    {
+      "title": "Notepad processes", 
+      "timestamp": 1388538906, 
+      "iocs": {
+        "query": [
+          {
+            "index_type": "events",
+            "search_query": "cb.urlver=1&cb.q.process_name=notepad.exe&sort=start%20desc&rows=10&start=0"
+          }
+        ]
+      }, 
+      "score": 50, 
+      "link": "http://www.dxmtest1.org/01",
+      
+      "id": "notepad_proc"
+    },
+    {
+      "title": "Newly loaded modules", 
+      "timestamp": 1388570000, 
+      "iocs":
+      {
+        "query": [
+          {
+            "index_type": "modules",
+            "search_query": "cb.urlver=1&q=is_executable_image%3Afalse&sort=server_added_timestamp%20desc"
+          }
+        ]
+      }, 
+      "score": 50,
+       
+      "link": "http://www.dxmtest1.org/02",
+      "id": "new_mod_loads"
+    }
+]
 ```
     
 ## Examples 
