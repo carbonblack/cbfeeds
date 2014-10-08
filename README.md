@@ -218,6 +218,13 @@ Another example with "query" IOC:
     }
 ]
 ```
+## Validation criteria for "query" IOC reports
+Following conditions apply for "query" IOC reports
+
+* the "iocs" element can only contain one "query" element
+* only "events" and "modules" are valid values for "index_type" element
+* a report with a query CANNOT also have other IOCs
+* the "search_query" syntax is described in CB Enterprise Server Query Overview documentation
     
 ## Examples 
 
