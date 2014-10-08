@@ -134,7 +134,7 @@ A `report` is a JSON structure with the following entries:
 
 ### iocs
 
-CB 4.0 ships with feeds version `1` and supports three kinds of IOCs:
+CB 4.0 ships with feeds version `1` and supports four kinds of IOCs:
 
 * IPv4 addresses
 * domain names
