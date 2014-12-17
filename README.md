@@ -225,6 +225,12 @@ Following conditions apply for "query" IOC reports
 * only "events" and "modules" are valid values for "index_type" element
 * a report with a query CANNOT also have other IOCs
 * the "search_query" syntax is described in CB Enterprise Server Query Overview documentation
+
+## Performance ramifications of "query" IOC reports
+
+Queries IOCs impose a much higher performance cost on the Carbon Black Enterprise Server than md5, dns, and ip IOCs.  Furthermore, the relative costs of queries can very signficantly.  As a general rule, 'events' queries are more expensive than 'modules' queries.  The use of wildcards, long paths, or multiple terms is also expensive.  
+
+It is recommended that feed developers take care in constructing query IOCs and test against representative server prior to deploying in production.
     
 ## Examples 
 
