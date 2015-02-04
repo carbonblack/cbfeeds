@@ -1,9 +1,9 @@
 import os
 import sys
-import code
 import time
 import optparse
 
+sys.path.insert(0, "../../")
 from cbfeeds import CbReport
 from cbfeeds import CbFeed
 from cbfeeds import CbFeedInfo
@@ -18,6 +18,7 @@ except ImportError:
     print "Error importing required libraries.  Requires python-stix library.  See https://stix.mitre.org/"
     sys.exit(-1)
 
+
 def merge(d1, d2):
     """ given two dictionaries, return a single dictionary
         that merges the two.   
@@ -31,6 +32,7 @@ def merge(d1, d2):
         else:
             result[k] = d2[k]
     return result
+
 
 def no_conditionals(obj):
     """ return true only if:
@@ -47,10 +49,11 @@ def no_conditionals(obj):
 
     # ... or if they're defined and any equals...
     if obj.apply_condition.lower() == "any" and \
-       obj.condition.lower() == "equals":
+                    obj.condition.lower() == "equals":
         return True
 
     return False
+
 
 def parse_File(file_obj):
     """ parse a FileObjectType and return a list of md5s
@@ -62,16 +65,16 @@ def parse_File(file_obj):
     iocs = {}
     iocs['md5'] = []
     for h in file_obj.Hashes.Hash:
-        if not hasattr(h, "Type"): 
+        if not hasattr(h, "Type"):
             continue
 
         # only get md5s that are true if any are present.  if not specified, assume so.
         if no_conditionals(h.Type) and \
-           (h.Type.valueOf_ and h.Type.valueOf_.lower() == "md5"):
-
+                (h.Type.valueOf_ and h.Type.valueOf_.lower() == "md5"):
             md5s = h.Simple_Hash_Value
             iocs['md5'].extend(md5s.valueOf_.split(md5s.delimiter))
     return iocs
+
 
 def parse_observable(observable):
     """ for each observable, if it's of a supported type, 
@@ -92,11 +95,12 @@ def parse_observable(observable):
         domains = prop.Value
         if no_conditionals(domains):
             iocs['dns'] = domains.valueOf_.split(domains.delimiter)
-    
+
     elif type(prop) == FileObjectType:
         merge(iocs, parse_File(prop))
 
     return iocs
+
 
 def parse_observables(observables):
     """ iterate over the set of observables, parse out
@@ -112,6 +116,7 @@ def parse_observables(observables):
 
     return iocs
 
+
 def build_report(fname):
     """ parse the provided STIX package and create a 
         CB Feed Report that includes all suitable observables
@@ -125,7 +130,7 @@ def build_report(fname):
 
     iocs = {}
     if pkg.observables:
-       iocs = parse_observables(pkg.observables.observables)
+        iocs = parse_observables(pkg.observables.observables)
 
     if pkg.indicators:
         for indicator in pkg.indicators:
@@ -133,12 +138,12 @@ def build_report(fname):
 
     ts = time.mktime(pkg.timestamp.timetuple()) if pkg.timestamp else int(time.mktime(time.gmtime()))
     fields = {'iocs': iocs,
-               'score': 100,  # does STIX have a severity field?
-               'timestamp': ts,
-               'link': 'http://stix.mitre.org',
-               'id': pkg.id_,
-               'title': pkg.stix_header.title,
-            }
+              'score': 100,  # does STIX have a severity field?
+              'timestamp': ts,
+              'link': 'http://stix.mitre.org',
+              'id': pkg.id_,
+              'title': pkg.stix_header.title,
+    }
 
     if len(iocs.keys()) == 0 or all(len(iocs[k]) == 0 for k in iocs):
         print "-> No suitable observables found in %s; skipping." % fname
@@ -146,6 +151,7 @@ def build_report(fname):
 
     print "-> Including %s observables from %s." % (sum(len(iocs[k]) for k in iocs), fname)
     return CbReport(**fields)
+
 
 def build_cli_parser():
     """
@@ -163,6 +169,7 @@ def build_cli_parser():
                       help="CB Feed output filename")
 
     return parser
+
 
 def build_reports(input_source):
     """ given an input file or directory, 
@@ -187,15 +194,15 @@ def build_reports(input_source):
                     rep = build_report(os.path.join(root, f))
                     if rep: reports.append(rep)
                 except UnsupportedVersionError, err:
-                    print "-> Skipping %s\n    UnsupportedVersionError: %s\n    see https://github.com/STIXProject/python-stix/issues/124" % (f, err)
+                    print "-> Skipping %s\n    UnsupportedVersionError: %s\n    see https://github.com/STIXProject/python-stix/issues/124" % (
+                        f, err)
                 except Exception, err:
                     print "-> Unexpected error parsing %s: %s; skipping." % (f, err)
-                    
 
     return reports
 
-def create(input_source):
 
+def create(input_source):
     reports = build_reports(input_source)
 
     # ****************************
@@ -207,11 +214,12 @@ def create(input_source):
                 'summary': "This feed was imported from stix package(s) at %s" % input_source,
                 'tech_data': "There are no requirements to share any data to receive this feed.",
                 'icon': 'images/stix.gif'
-                }
+    }
 
     feedinfo = CbFeedInfo(**feedinfo)
     feed = CbFeed(feedinfo, reports)
     return feed.dump()
+
 
 if __name__ == "__main__":
     parser = build_cli_parser()

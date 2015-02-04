@@ -1,12 +1,9 @@
-import re
 import sys
-import time
 import json
-import urllib
-import socket
-import base64
-import cbfeeds
 import optparse
+
+import cbfeeds
+
 
 def build_cli_parser():
     """
@@ -16,18 +13,19 @@ def build_cli_parser():
     usage = "usage: %prog [options]"
     desc = "Validate a Carbon Black feed"
 
-    parser = optparse.OptionParser(usage=usage, description=desc)
-    
-    parser.add_option("-f", "--feedfile", action="store", type="string", dest="feed_filename",
-                      help="Feed Filename to validate")
-    parser.add_option("-p", "--pedantic", action="store_true", default=False, dest="pedantic",
-                      help="Validates that no non-standard JSON elements exist")
-    parser.add_option("-e", "--exclude", action="store", default=None, dest="exclude",
-                      help="Filename of 'exclude' list - newline delimited indicators to consider invalid")
-    parser.add_option("-i", "--include", action="store", default=None, dest="include",
-                      help="Filename of 'include' list - newline delimited indicators to consider valid")
+    cmd_parser = optparse.OptionParser(usage=usage, description=desc)
 
-    return parser
+    cmd_parser.add_option("-f", "--feedfile", action="store", type="string", dest="feed_filename",
+                          help="Feed Filename to validate")
+    cmd_parser.add_option("-p", "--pedantic", action="store_true", default=False, dest="pedantic",
+                          help="Validates that no non-standard JSON elements exist")
+    cmd_parser.add_option("-e", "--exclude", action="store", default=None, dest="exclude",
+                          help="Filename of 'exclude' list - newline delimited indicators to consider invalid")
+    cmd_parser.add_option("-i", "--include", action="store", default=None, dest="include",
+                          help="Filename of 'include' list - newline delimited indicators to consider valid")
+
+    return cmd_parser
+
 
 def validate_file(feed_filename):
     """
@@ -37,17 +35,19 @@ def validate_file(feed_filename):
     contents = f.read()
     return contents
 
+
 def validate_json(contents):
     """
     validate that the file is well-formed JSON
     """
     return json.loads(contents)
 
+
 def validate_feed(feed, pedantic=False):
     """
     validate that the file is valid as compared to the CB feeds schema
     """
-     
+
     # verify that we have both of the required feedinfo and reports elements
     #
     if not feed.has_key("feedinfo"):
@@ -61,11 +61,12 @@ def validate_feed(feed, pedantic=False):
 
     # validate the feed
     # this validates that all required fields are present, and that
-    #   all required values are within valid ranges
+    # all required values are within valid ranges
     #
-    feed.validate(pedantic) 
-    
+    feed.validate(pedantic)
+
     return feed
+
 
 def validate_against_include_exclude(feed, include, exclude):
     """
@@ -74,6 +75,7 @@ def validate_against_include_exclude(feed, include, exclude):
     for ioc in feed.iter_iocs():
         if ioc["ioc"] in exclude and not ioc["ioc"] in include:
             raise Exception(ioc)
+
 
 def gen_include_exclude_sets(include_filename, exclude_filename):
     """
@@ -91,6 +93,7 @@ def gen_include_exclude_sets(include_filename, exclude_filename):
             exclude.add(indicator.strip())
 
     return include, exclude
+
 
 if __name__ == "__main__":
 

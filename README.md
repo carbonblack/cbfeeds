@@ -134,11 +134,12 @@ A `report` is a JSON structure with the following entries:
 
 ### iocs
 
-CB 4.0 ships with feeds version `1` and supports three kinds of IOCs:
+CB 4.0 ships with feeds version `1` and supports four kinds of IOCs:
 
 * IPv4 addresses
 * domain names
 * md5s
+* query - this contains query related to modules or events
 
 `iocs` is a structure with one or more of these entries:
 
@@ -146,7 +147,8 @@ CB 4.0 ships with feeds version `1` and supports three kinds of IOCs:
 | -------------- | -------- |-------------| 
 | `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form| 
 | `dns`          | OPTIONAL | A list of domain names| 
-| `md5`          | OPTIONAL | A list of md5s| 
+| `md5`          | OPTIONAL | A list of md5s|
+| `query`		 | OPTIONAL | A query of type "events" or "modules"| 
 
 An example `reports` list with two `report` structures, each with one IPv4 IOC, from the example_tor.py script:
 
@@ -176,6 +178,59 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
     }
   ]
 ```
+Another example with "query" IOC:
+
+```
+"reports": 
+[
+    {
+      "title": "Notepad processes", 
+      "timestamp": 1388538906, 
+      "iocs": {
+        "query": [
+          {
+            "index_type": "events",
+            "search_query": "cb.urlver=1&cb.q.process_name=notepad.exe&sort=start%20desc&rows=10&start=0"
+          }
+        ]
+      }, 
+      "score": 50, 
+      "link": "http://www.dxmtest1.org/01",
+      
+      "id": "notepad_proc"
+    },
+    {
+      "title": "Newly loaded modules", 
+      "timestamp": 1388570000, 
+      "iocs":
+      {
+        "query": [
+          {
+            "index_type": "modules",
+            "search_query": "cb.urlver=1&q=is_executable_image%3Afalse&sort=server_added_timestamp%20desc"
+          }
+        ]
+      }, 
+      "score": 50,
+       
+      "link": "http://www.dxmtest1.org/02",
+      "id": "new_mod_loads"
+    }
+]
+```
+## Validation criteria for "query" IOC reports
+Following conditions apply for "query" IOC reports
+
+* the "iocs" element can only contain one "query" element
+* only "events" and "modules" are valid values for "index_type" element
+* a report with a query CANNOT also have other IOCs
+* the "search_query" syntax is described in CB Enterprise Server Query Overview documentation
+
+## Performance ramifications of "query" IOC reports
+
+Queries IOCs impose a much higher performance cost on the Carbon Black Enterprise Server than md5, dns, and ip IOCs.  Furthermore, the relative costs of queries can very signficantly.  As a general rule, 'events' queries are more expensive than 'modules' queries.  The use of wildcards, long paths, or multiple terms is also expensive.  
+
+It is recommended that feed developers take care in constructing query IOCs and test against representative server prior to deploying in production.
     
 ## Examples 
 
