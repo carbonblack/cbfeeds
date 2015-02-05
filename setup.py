@@ -8,7 +8,7 @@ import sys
 
 setup(
     name='python-cbfeeds',
-    version='0.5.2',
+    version='0.6',
     url='http://github.com/carbonblack/cbfeeds',
     license='',
     author='Carbon Black',
