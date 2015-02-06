@@ -1,4 +1,5 @@
 # stdlib imports
+import os
 import sys
 import time
 import urllib
@@ -65,13 +66,19 @@ def create():
                 'provider_url': 'https://www.torproject.org/',
                 'summary': "This feed is a list of Tor Node IP addresses, updated every 30 minutes.",
                 'tech_data': "There are no requirements to share any data to receive this feed.",
-                'icon': 'images/tor.png'}
+                'icon': 'tor.png'}
+
+    # lazy way out to get right icon path.  sorry.
+    old_cwd = os.getcwd()
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
     feedinfo = CbFeedInfo(**feedinfo)
     feed = CbFeed(feedinfo, reports)
+    created_feed = feed.dump()
 
-    return feed.dump()
+    os.chdir(old_cwd)
 
+    return created_feed
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
