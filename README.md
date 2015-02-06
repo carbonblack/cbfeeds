@@ -1,4 +1,4 @@
-# Carbon Black Feeds
+# Carbon Black Feeds [![Build Status](https://travis-ci.org/carbonblack/cbfeeds.svg?branch=master)](https://travis-ci.org/carbonblack/cbfeeds) 
 
 ## Overview
 
