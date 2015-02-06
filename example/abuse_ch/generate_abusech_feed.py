@@ -24,10 +24,8 @@ def get_zeus():
     lines = r.text.split("\n")
     domains = []
     for line in lines:
-        if len(line) < 3:
-            continue
-        if line[0] == "#":
-            continue
+        if len(line) < 3: continue
+        if line[0] == "#": continue
 
         domains.append(line.strip())
 
@@ -38,7 +36,7 @@ def get_zeus():
         'link': "https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
         'id': 'abusech-zeus',
         'title': 'abuse.ch Zeus hit on Standard domain blocklist',
-        'score': 50,
+        'score': 100,
     }
     reports.append(CbReport(**fields))
     return reports
@@ -50,10 +48,8 @@ def get_palevo():
     lines = r.text.split("\n")
     domains = []
     for line in lines:
-        if len(line) < 3:
-            continue
-        if line[0] == "#":
-            continue
+        if len(line) < 3: continue
+        if line[0] == "#": continue
 
         domains.append(line.strip())
 
@@ -64,33 +60,7 @@ def get_palevo():
         'link': "https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist",
         'id': 'abusech-palevo',
         'title': 'abuse.ch Palevo hit on domain blocklist',
-        'score': 50,
-    }
-    reports.append(CbReport(**fields))
-    return reports
-
-
-def get_spyeye():
-    reports = []
-    r = requests.get("https://spyeyetracker.abuse.ch/blocklist.php?download=domainblocklist")
-    lines = r.text.split("\n")
-    domains = []
-    for line in lines:
-        if len(line) < 3:
-            continue
-        if line[0] == "#":
-            continue
-
-        domains.append(line.strip())
-
-    fields = {'iocs': {
-        "dns": domains,
-    },
-        'timestamp': int(time.mktime(time.gmtime())),
-        'link': "https://spyeyetracker.abuse.ch/blocklist.php",
-        'id': 'abusech-spyeye',
-        'title': 'abuse.ch SpyEye hit on domain blocklist',
-        'score': 50,
+        'score': 100,
     }
     reports.append(CbReport(**fields))
     return reports
@@ -100,13 +70,12 @@ def create():
     reports = []
     reports.extend(get_zeus())
     reports.extend(get_palevo())
-    reports.extend(get_spyeye())
 
     feedinfo = {'name': 'abusech',
                 'display_name': "abuse.ch Malware Domains",
                 'provider_url': "http://www.abuse.ch",
-                'summary': "abuse.ch tracks C&C servers for Zeus, SpyEye and Palevo malware. " +
-                           "This feed combines the three domain names blocklists.",
+                'summary': "abuse.ch tracks C&C servers for Zeus and Palevo malware. " +
+                           "This feed combines the two domain names blocklists.",
                 'tech_data': "There are no requirements to share any data to receive this feed.",
                 "icon": "abuse.ch.jpg"
                 }
