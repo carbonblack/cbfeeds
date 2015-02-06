@@ -74,10 +74,10 @@ def reports_from_csv(lines):
                                   },
                           'timestamp': int(time.mktime(report_date)),
                           'link': "http://www.malwaredomainlist.com/mdl.php",
-                          'id': 'MDL-%s-%s' % (time.strftime("%Y%m%d-%H%M", report_date), url.netloc),
-                          'title': '%s found on malware domain list: "%s"' % (url.netloc, desc) + 
+                          'id': 'MDL-%s-%s' % (time.strftime("%Y%m%d-%H%M", report_date), host),
+                          'title': '%s found on malware domain list: "%s"' % (host, desc) + 
                                    ' IP (reverse lookup) at the time:  %s (%s)' % (ip, reverse_lookup),
-                          'score': 50,
+                          'score': 100,
                         }
 
                 reports.append(CbReport(**fields))
