@@ -22,7 +22,7 @@ def generate_feed_information():
     this is feed 'metadata' - the description of the feed, and not the feed contents
     """
     feed = {}
-    feed["name"] = "isight"
+    feed["name"] = "iSIGHT"
     feed["display_name"] = "iSIGHT Partners feed"
     feed["summary"] = "iSIGHT Partners provides a cyber intelligence feed"
     feed["tech_data"] = "There are no requirements to share any data with Carbon Black to receive this feed.  The underlying IOC data is provided by iSIGHT Partners"
@@ -61,11 +61,11 @@ def retrieve_report_score(report_name, api, default_score):
 
             rating = field._children[0].text
             if 'HIGH' == rating:
-                return 75
+                return 100
             elif 'MEDIUM' == rating:
-                return 50
+                return 80
             elif 'LOW' == rating:
-                return 25
+                return 60
             else:
                 print "WARNING: can't find score for %s; using default" % report_name
                 return default_score 
@@ -132,9 +132,9 @@ def generate_reports(raw, api):
         #
         # Some iSIGHT reports have NO criticality rating.
         # For lack of clear obvious next steps, simply report the score as
-        # zero.
+        # 75 -- "medium high"
         #
-        entry["score"] = retrieve_report_score(entry["id"], api, 0) 
+        entry["score"] = retrieve_report_score(entry["id"], api, 75) 
 
         reports.append(CbReport(**entry))
 
