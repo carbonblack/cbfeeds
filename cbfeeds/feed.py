@@ -198,14 +198,37 @@ class CbReport(object):
             raise CbInvalidReport(
                 "Report IOCs section for \"query\" contains extra keys: %s for report %s" %
                 (set(iocs.keys()), self.data["id"]))
-
+        
         if query_ioc:
             iocs_query = iocs["query"][0]
-            if "index_type" in iocs_query.keys():
-                if not iocs_query.get("index_type", None) in self.valid_query_ioc_types:
-                    raise CbInvalidReport(
-                        "Report IOCs section for \"query\" contains invalid index_type: %s for report %s" %
-                        (iocs_query.get("index_type", None), self.data["id"]))
+           
+            # validate that the index_type field exists 
+            if "index_type" not in iocs_query.keys():
+                raise CbInvalidReport("Query IOC section for report %s missing index_type" % self.data["id"])
+            
+            # validate that the index_type is a valid value
+            if not iocs_query.get("index_type", None) in self.valid_query_ioc_types:
+                raise CbInvalidReport(
+                    "Report IOCs section for \"query\" contains invalid index_type: %s for report %s" %
+                    (iocs_query.get("index_type", None), self.data["id"]))
+
+            # validate that the search_query field exists 
+            if "search_query" not in iocs_query.keys():
+                raise CbInvalidReport("Query IOC for report %s missing 'search_query'" % self.data["id"])
+
+            # validate that the search_query field is at least minimally valid
+            # in particular, we are looking for a "q=" or "cb.q."
+            # this is by no means a complete validation, but it does provide a protection
+            # against leaving the actual query unqualified
+            if "q=" not in iocs_query["search_query"] and "cb.q." not in iocs_query["search_query"]:
+                raise CbInvalidReport("Query IOC for report %s missing q= on query" % self.data["id"])
+
+            # the query must be percent-encoded
+            # verify there are only non-reserved characters present
+            # no logic to detect unescaped '%' characters
+            for c in iocs_query["search_query"]:
+                if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~":
+                    raise CbInvalidReport("Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (c, self.data["id"]))
 
         # validate all md5 fields are 32 characters, just alphanumeric, and 
         # do not include [g-z] and [G-Z] meet the alphanumeric criteria but are not valid in a md5
