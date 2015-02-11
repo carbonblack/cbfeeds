@@ -16,6 +16,13 @@ The Carbon Black 4.0+ server supports three types of indicators:
   * IPv4 addresses
   * DNS names
 
+The Carbon Black 5.0+ server adds support for two new types of indicators:
+
+  * Process Queries (Process Searches)
+  * Binary Queries (Binary Searches)
+
+Please note that query IOC types have significant differences as compared to MD5s, IPv4 addresses, and DNS names.  Please see notes below regarding their usage.
+
 The feed format, described in the "Feed Structure" section below, is designed for simplicity.  This should make it
 easy to add support for feed data from any input source.
 
@@ -148,7 +155,7 @@ CB 4.0 ships with feeds version `1` and supports four kinds of IOCs:
 | `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form| 
 | `dns`          | OPTIONAL | A list of domain names| 
 | `md5`          | OPTIONAL | A list of md5s|
-| `query`		 | OPTIONAL | A query of type "events" or "modules"| 
+| `query`        | OPTIONAL | A query of type "events" or "modules"| 
 
 An example `reports` list with two `report` structures, each with one IPv4 IOC, from the example_tor.py script:
 
@@ -190,12 +197,12 @@ Another example with "query" IOC:
         "query": [
           {
             "index_type": "events",
-            "search_query": "cb.urlver=1&cb.q.process_name=notepad.exe&sort=start%20desc&rows=10&start=0"
+            "search_query": "cb.urlver=1&cb.q.process_name=notepad.exe"
           }
         ]
       }, 
       "score": 50, 
-      "link": "http://www.dxmtest1.org/01",
+      "link": "http://www.myfeedserver/feed/report/notepad_proc",
       
       "id": "notepad_proc"
     },
@@ -207,7 +214,7 @@ Another example with "query" IOC:
         "query": [
           {
             "index_type": "modules",
-            "search_query": "cb.urlver=1&q=is_executable_image%3Afalse&sort=server_added_timestamp%20desc"
+            "search_query": "cb.urlver=1&q=is_executable_image%3Afalse"
           }
         ]
       }, 
@@ -224,7 +231,14 @@ Following conditions apply for "query" IOC reports
 * the "iocs" element can only contain one "query" element
 * only "events" and "modules" are valid values for "index_type" element
 * a report with a query CANNOT also have other IOCs
+
+The "search_query" syntax is particularly noteworthy.  The following conditions apply for the "search_query" field:
+
 * the "search_query" syntax is described in CB Enterprise Server Query Overview documentation
+* the query itself should be prepended with either q= or cb.q.<fieldname>=
+* the query should be percent-encoded.  This can be accomplished by copying a query from the Carbon Black UI or using a quoting library such as included with python in urllib.
+
+As with all feeds, it is highly recommended to provide initial validation of the feed with the included validate_feed.py script.
 
 ## Performance ramifications of "query" IOC reports
 
