@@ -25,5 +25,7 @@ if __name__ == "__main__":
     if not options.query:
         print "-> Must specify a query to encode; use the -q switch or --help for usage"
         sys.exit(0)
-
+    
+    print options.query
+    print
     print urllib.quote(options.query)

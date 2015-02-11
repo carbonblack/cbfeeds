@@ -144,6 +144,17 @@ class CbReport(object):
         self.validate()
         return self.data
 
+    def is_valid_query(self, q, reportid):
+        """
+        make a determination as to if this is a valid query
+        """
+        # the query itself must be percent-encoded
+        # verify there are only non-reserved characters present
+        # no logic to detect unescaped '%' characters
+        for c in q:
+            if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%":
+                raise CbInvalidReport("Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (c, reportid))
+ 
     def validate(self, pedantic=False):
 
         # validate we have all required keys
@@ -223,12 +234,11 @@ class CbReport(object):
             if "q=" not in iocs_query["search_query"] and "cb.q." not in iocs_query["search_query"]:
                 raise CbInvalidReport("Query IOC for report %s missing q= on query" % self.data["id"])
 
-            # the query must be percent-encoded
-            # verify there are only non-reserved characters present
-            # no logic to detect unescaped '%' characters
-            for c in iocs_query["search_query"]:
-                if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~":
-                    raise CbInvalidReport("Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (c, self.data["id"]))
+            for kvpair in iocs_query["search_query"].split('&'):
+              if 2 != len(kvpair.split('=')):
+                  continue
+              if kvpair.split('=')[0] == 'q':
+                  self.is_valid_query(kvpair.split('=')[1], self.data["id"])
 
         # validate all md5 fields are 32 characters, just alphanumeric, and 
         # do not include [g-z] and [G-Z] meet the alphanumeric criteria but are not valid in a md5
