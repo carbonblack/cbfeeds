@@ -235,10 +235,13 @@ Following conditions apply for "query" IOC reports
 The "search_query" syntax is particularly noteworthy.  The following conditions apply for the "search_query" field:
 
 * the "search_query" syntax is described in CB Enterprise Server Query Overview documentation
-* the query itself should be prepended with either q= or cb.q.<fieldname>=
-* the query should be percent-encoded.  This can be accomplished by copying a query from the Carbon Black UI or using a quoting library such as included with python in urllib.
-
-As with all feeds, it is highly recommended to provide initial validation of the feed with the included validate_feed.py script.
+* the query itself should be prepended with a q=
+* the query should be percent-encoded.  This can be accomplished in several ways, including:
+** by copying a query from the Carbon Black UI
+** by using a quoting library such as included with python in urllib.
+** by using the included percent_encode_query.py script
+ 
+As with all feeds, it is highly recommended to provide initial validation of the feed with the included validate_feed.py script.  For any feeds that include query IOCs, it is recommended to run feed_query_validate.py in the cbapi github repo.
 
 ## Performance ramifications of "query" IOC reports
 
