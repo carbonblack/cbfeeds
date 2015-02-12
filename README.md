@@ -197,7 +197,7 @@ Another example with "query" IOC:
         "query": [
           {
             "index_type": "events",
-            "search_query": "cb.urlver=1&cb.q.process_name=notepad.exe"
+            "search_query": "cb.urlver=1&q=process_name%3Anotepad.exe"
           }
         ]
       }, 
