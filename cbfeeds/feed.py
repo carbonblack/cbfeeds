@@ -152,7 +152,7 @@ class CbReport(object):
         # verify there are only non-reserved characters present
         # no logic to detect unescaped '%' characters
         for c in q:
-            if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%":
+            if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%*":
                 raise CbInvalidReport("Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (c, reportid))
  
     def validate(self, pedantic=False):
