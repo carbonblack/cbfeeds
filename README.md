@@ -1,5 +1,9 @@
 # Carbon Black Feeds [![Build Status](https://travis-ci.org/carbonblack/cbfeeds.svg?branch=master)](https://travis-ci.org/carbonblack/cbfeeds) 
 
+## License
+
+Use of the Carbon Black Feeds API is governed by the license found in LICENSE.md.
+
 ## Overview
 
 Carbon Black 4.0+ ships with support for threat intelligence feeds.  The Indicators of Compromise (IOCs) 
