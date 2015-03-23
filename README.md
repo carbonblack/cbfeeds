@@ -145,6 +145,12 @@ A `report` is a JSON structure with the following entries:
 | `title`        | REQUIRED | A one-line title describing this report.| 
 | `score`        | REQUIRED | The severity of this report from -100 to 100, with 100 most critical.| 
 | `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report id.  The IOC format is described below.| 
+| `tags`         | OPTIONAL | Zero or more optional alphanumeric tags to annotate the report.  See notes.|
+
+Notes:
+
+* Tags were introduced with Carbon Black Server 5.1
+* Tags must be alphanumeric.
 
 ### iocs
 

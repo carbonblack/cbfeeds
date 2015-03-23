@@ -132,8 +132,11 @@ class CbReport(object):
         # negative scores indicate a measure of "goodness" versus "badness"
         self.allow_negative_scores = allow_negative_scores
 
-        # these fields are required in every report descriptor
+        # these fields are required in every report
         self.required = ["iocs", "timestamp", "link", "title", "id", "score"]
+
+        # these fields are optional
+        self.optional = ["tags"]
 
         # valid IOC types are "md5", "ipv4", "dns", "query"
         self.valid_ioc_types = ["md5", "ipv4", "dns", "query"]
@@ -170,9 +173,19 @@ class CbReport(object):
             raise CbInvalidReport("Report missing required field(s): %s" % missing_fields)
 
         # (pedantically) validate that no extra keys are present
-        if pedantic and len(self.data.keys()) > len(self.required):
-            raise CbInvalidReport("Report contains extra keys: %s" % (set(self.data.keys()) - set(self.required)))
+        for key in self.data.keys():
+            if pedantic and key not in self.required and key not in self.optional:
+                raise CbInvalidReport("Report contains extra key '%s'" % key)
 
+        # validate that tags is a list of alphanumeric strings
+        if "tags" in self.data.keys():
+            if type(self.data["tags"]) != type([]):
+                raise CbInvalidReport("Tags must be a list")
+            for tag in self.data["tags"]:
+                if not str(tag).isalnum():
+                    raise CbInvalidReport("Tag '%s' is not alphanumeric" % tag)
+                if len(tag) > 32:
+                    raise CbInvalidReport("Tags must be 32 characters or fewer") 
         # validate score is integer between -100 (if so specified) or 0 and 100
         try:
             int(self.data["score"])
