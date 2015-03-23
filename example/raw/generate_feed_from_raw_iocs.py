@@ -84,7 +84,10 @@ def build_reports(options):
               'title': options.report,
               'id': gen_report_id(ips + domains + md5s),
               'score': 100}
-
+   
+    if options.tags is not None: 
+        fields['tags'] = options.tags.split(',')
+    
     if len(ips) > 0:
         fields['iocs']['ipv4'] = ips
     if len(domains) > 0:
@@ -153,6 +156,8 @@ def _build_cli_parser():
                       help="IOC filename")
     parser.add_option("-r", "--report", action="store", type="string", dest="report",
                       help="Report Name")
+    parser.add_option("-g", "--tags", action="store", type="string", dest="tags",
+                      help="Optional comma-delimited report tags")
 
     return parser
 
