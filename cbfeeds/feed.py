@@ -70,8 +70,9 @@ class CbFeed(object):
 class CbFeedInfo(object):
     def __init__(self, **kwargs):
         # these fields are required in every feed descriptor
-        self.required = ["name", "display_name", "version",
+        self.required = ["name", "display_name",
                          "summary", "tech_data", "provider_url"]
+        self.optional = ["category", "icon", "version"]
         self.data = kwargs
         self.data["version"] = 1
 
@@ -85,6 +86,11 @@ class CbFeedInfo(object):
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
             raise CbInvalidFeed("FeedInfo missing required field(s): %s" % missing_fields)
+
+        # verify no non-supported keys are present
+        for key in self.data.keys():
+            if key not in self.required and key not in self.optional:
+                raise CbInvalidFeed("FeedInfo includes extraneous key '%s'" % key)
 
         # validate shortname of this field is just a-z and 0-9, with at least one character
         if not self.data["name"].isalnum():

@@ -105,16 +105,19 @@ Each `report` has report metadata and a list of IOCs.
 
 | name           | status   | description | 
 | -------------- | -------- |-------------| 
-| `name`         | REQUIRED | Internal name; must not include spaces or special characters.  See Notes. | 
+| `name`         | REQUIRED | Internal name; must not include spaces or special characters.  See notes. | 
 | `display_name` | REQUIRED | Display name for the user interface. | 
 | `provider_url` | REQUIRED | Human-consumpable link to view more information about this feed. | 
 | `summary`      | REQUIRED | A short description of this feed. | 
-| `tech_data`    | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
-| `icon`         | OPTIONAL | A base64 encoded version of the image to use in the user interface | 
+| `tech_data`    | REQUIRED | More detailed technical description. | 
+| `icon`         | OPTIONAL | An optional base64-encoded PNG image to use in the user interface. | 
+| `category`     | OPTIONAL | An arbitrary category in which to place the feed.  See notes. |
 
 Notes:
 
-The 'name' field must not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
+* The 'name' field must not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
+* The 'category' field was introduced in Carbon Black version 5.1
+* Examples of common categories include "Detonation", "Network Integration", and "Open Source Threat Intelligence"
 
 An example `feedinfo` structure, from the example_tor.py script:
 
@@ -125,8 +128,8 @@ An example `feedinfo` structure, from the example_tor.py script:
     "name": "tor",
     "tech_data": "There are no requirements to share any data to receive this feed.",
     "summary": "This feed is a list of Tor Node IP addresses, updated every 30 minutes.",
-    "version": 1,
-    "icon": "...."
+    "icon": "....",
+    "category": "Open Source Threat Intelligence"
    }
 ```
 
@@ -145,12 +148,12 @@ A `report` is a JSON structure with the following entries:
 
 ### iocs
 
-CB 4.0 ships with feeds version `1` and supports four kinds of IOCs:
+Carbon Black 5.0+ ships with support for four kinds of IOCs:
 
 * IPv4 addresses
 * domain names
 * md5s
-* query - this contains query related to modules or events
+* query - this contains query related to binaries (modules) or processes (events)
 
 `iocs` is a structure with one or more of these entries:
 
@@ -234,7 +237,7 @@ Following conditions apply for "query" IOC reports
 
 * the "iocs" element can only contain one "query" element
 * only "events" and "modules" are valid values for "index_type" element
-* a report with a query CANNOT also have other IOCs
+* a report with a query SHALL NOT also have other IOCs
 
 The "search_query" syntax is particularly noteworthy.  The following conditions apply for the "search_query" field:
 
