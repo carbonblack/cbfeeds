@@ -72,7 +72,7 @@ class CbFeedInfo(object):
         # these fields are required in every feed descriptor
         self.required = ["name", "display_name",
                          "summary", "tech_data", "provider_url"]
-        self.optional = ["category", "icon", "version"]
+        self.optional = ["category", "icon", "version", "icon_small"]
         self.data = kwargs
         self.data["version"] = 1
 
@@ -97,25 +97,26 @@ class CbFeedInfo(object):
             raise CbInvalidFeed(
                 "Feed name %s may only contain a-z, A-Z, 0-9 and must have one character" % self.data["name"])
 
-        # if icon exists and points to a file, grab the bytes
+        # if icons exist and points to a file, grab the bytes
         # and base64 them
-        if "icon" in self.data and os.path.exists(self.data["icon"]):
-            # TODO - enforce size restrictions? dimensions?  orientation?
-            # raise CbIconError("...")
+        for icon_field in ["icon", "icon_small"]:
+            if icon_field in self.data and os.path.exists(self.data[icon_field]):
+                # TODO - enforce size restrictions? dimensions?  orientation?
+                # raise CbIconError("...")
 
-            icon_path = self.data.pop("icon")
-            try:
-                self.data["icon"] = base64.b64encode(open(icon_path, "r").read())
-            except Exception, err:
-                raise CbIconError("Unknown error reading/encoding icon data: %s" % err)
-        # otherwise, double-check it's valid base64
-        elif "icon" in self.data:
-            try:
-                base64.b64decode(self.data["icon"])
-            except TypeError, err:
-                raise CbIconError("Icon must either be path or base64 data.  \
-                                    Path does not exist and base64 decode failed with: %s" % err)
-
+                icon_path = self.data.pop(icon_field)
+                try:
+                    self.data[icon_field] = base64.b64encode(open(icon_path, "r").read())
+                except Exception, err:
+                    raise CbIconError("Unknown error reading/encoding icon data: %s" % err)
+            # otherwise, double-check it's valid base64
+            elif icon_field in self.data:
+                try:
+                    base64.b64decode(self.data[icon_field])
+                except TypeError, err:
+                    raise CbIconError("Icon must either be path or base64 data.  \
+                                        Path does not exist and base64 decode failed with: %s" % err)
+        
         return True
 
     def __str__(self):
