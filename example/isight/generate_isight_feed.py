@@ -28,6 +28,7 @@ def generate_feed_information():
     feed["tech_data"] = "There are no requirements to share any data with Carbon Black to receive this feed.  The underlying IOC data is provided by iSIGHT Partners"
     feed["provider_url"] = "http://www.isightpartners.com/"
     feed["icon"] = "isight.png"
+    feed["icon_small"] = "isight.small.jpg"
 
     return CbFeedInfo(**feed)
 
