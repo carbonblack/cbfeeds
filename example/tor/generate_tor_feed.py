@@ -66,7 +66,8 @@ def create():
                 'provider_url': 'https://www.torproject.org/',
                 'summary': "This feed is a list of Tor Node IP addresses, updated every 30 minutes.",
                 'tech_data': "There are no requirements to share any data to receive this feed.",
-                'icon': 'tor.png'}
+                'icon': 'tor.png',
+                'icon_small': 'tor.small.jpg'}
 
     # lazy way out to get right icon path.  sorry.
     old_cwd = os.getcwd()
