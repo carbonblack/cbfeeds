@@ -252,7 +252,23 @@ As with all feeds, it is highly recommended to provide initial validation of the
 Queries IOCs impose a much higher performance cost on the Carbon Black Enterprise Server than md5, dns, and ip IOCs.  Furthermore, the relative costs of queries can very signficantly.  As a general rule, 'events' queries are more expensive than 'modules' queries.  The use of wildcards, long paths, or multiple terms is also expensive.  
 
 It is recommended that feed developers take care in constructing query IOCs and test against representative server prior to deploying in production.
-    
+
+## Feed Synchronization 
+
+The Carbon Black server periodically synchronizes enabled feeds.  There are two types of feed synchronization:
+
+* Incremental
+* Full
+
+Incremental synchronization updates any new reports and reports with updated timestamps.  Deleted reports and those reports which have been changed, but without a change to the report timestamp, are not synchronized.
+
+Full synchronization accounts for all feed changes, even when the report timestamp is not changed or a report is deleted.
+
+Full synchronization occurs less frequently than incremental synchronization.  It can be triggered manually via the web console or via the Carbon Black Client API.  Alternatively, the following practices will result in all report changes being synchronized via incremental synchronization:
+
+* Update all report timestamps whenever there is a change to the report.  The accuracy of the timestamp is less important than the fact that the timestamp increases.
+* For reports to be deleted, remove all IOCs from the report and update the timestamp rather than removing the report.
+ 
 ## Examples 
 
 Several example scripts are included in the 'example' subdirectory.  These example scripts illustrate using the Carbon Black cbfeeds API to generate Carbon Black feeds from a variety of data sources.
