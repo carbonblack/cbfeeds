@@ -13,7 +13,6 @@ class CbJSONEncoder(json.JSONEncoder):
     def default(self, o):
         return o.dump()
 
-
 class CbFeed(object):
     def __init__(self, feedinfo, reports):
         self.data = {'feedinfo': feedinfo,
@@ -43,6 +42,21 @@ class CbFeed(object):
             for domain in report.get("iocs", {}).get("dns", []):
                 yield {"type": "dns", "ioc": domain, "report_id": report.get("id", "")}
 
+    def validate_report_list(slf, reports):
+        """
+        validates reports as a set, as compared to each report as a standalone entity
+
+        @param[in] reports - list of reports
+        """
+        reportids = set()
+
+        # verify that no two reports have the same feed id
+        # see CBAPI-17
+        for report in reports:
+            if report['id'] in reportids:
+                raise CbInvalidFeed("duplicate report id '%s'" % report['id']) 
+            reportids.add(report['id'])
+
     def validate(self, pedantic=False, serialized_data=None):
         """
         @param[in] pedantic - when set, perform strict validation
@@ -58,14 +72,17 @@ class CbFeed(object):
         if not 'reports' in data:
             raise CbInvalidFeed("Feed missing 'reports' structure")
 
-        # instantiate each object and validate.  Will throw
-        # exceptions on error
+        # validate the feed info
         fi = CbFeedInfo(**data["feedinfo"])
         fi.validate(pedantic=pedantic)
+       
+        # validate each report individually
         for rep in data["reports"]:
             report = CbReport(**rep)
             report.validate(pedantic=pedantic)
 
+        # validate the reports as a whole
+        self.validate_report_list(data["reports"])
 
 class CbFeedInfo(object):
     def __init__(self, **kwargs):

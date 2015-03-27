@@ -67,7 +67,6 @@ def validate_feed(feed, pedantic=False):
 
     return feed
 
-
 def validate_against_include_exclude(feed, include, exclude):
     """
     ensure that no feed indicators are 'excluded' or blacklisted
