@@ -44,6 +44,8 @@ def reports_from_csv(lines):
     """ takes a file-like object that is full list of CSV data from
         from malwaredomainlist.  creates a report per line """
     reports = []
+    unique_domains = set()
+
     try:
         for line in unicode_csv_reader(lines):
             if len(line)== 0: continue
@@ -59,7 +61,7 @@ def reports_from_csv(lines):
                 if report_datetime < start:
                     continue 
 
-                #url www.slivki.com.ua/as/Ponynl.exe
+                # url www.slivki.com.ua/as/Ponynl.exe
                 url = urlparse.urlsplit("http://%s" % url)
                 host = url.netloc
                 if ":" in host:
@@ -68,6 +70,13 @@ def reports_from_csv(lines):
                 if len(host) <= 3:
                     print "WARNING: no domain, skipping %s" % line
                     continue
+
+                # avoid duplicate report ids
+                # CBAPI-21
+                if host in unique_domains:
+                    continue
+                else:
+                    unique_domains.add(host)
 
                 fields = {'iocs': {
                                     "dns": [host],
