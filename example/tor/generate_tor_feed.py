@@ -42,7 +42,15 @@ def get_tor_nodes():
 def build_reports(nodes):
     # TODO - this is one "report" per TOR node IP.  Not ideal.
     reports = []
+    unique_ips = set()
     for node in nodes:
+        # avoid duplicated reports
+        # CBAPI-22
+        if node['ip'] in unique_ips:
+            continue
+        else:
+            unique_ips.add(node['ip'])
+
         fields = {'iocs': {
             'ipv4': [node['ip'], ]
         },
