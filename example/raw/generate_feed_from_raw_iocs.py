@@ -84,7 +84,10 @@ def build_reports(options):
               'title': options.report,
               'id': gen_report_id(ips + domains + md5s),
               'score': 100}
-
+   
+    if options.tags is not None: 
+        fields['tags'] = options.tags.split(',')
+    
     if len(ips) > 0:
         fields['iocs']['ipv4'] = ips
     if len(domains) > 0:
@@ -113,7 +116,19 @@ def create_feed(options):
     if options.icon:
         bytes = base64.b64encode(open(options.icon).read())
         feedinfo['icon'] = bytes 
-        
+    
+    # if a small icon was provided, encode as base64 and 
+    # include in the feed information
+    #
+    if options.small_icon:
+        bytes = base64.b64encode(open(options.small_icon).read())
+        feedinfo['icon_small']
+  
+    # if a feed category was provided, include it in the feed information
+    #
+    if options.category:
+        feedinfo['category'] = options.category
+ 
     # build a CbFeedInfo instance
     # this does field validation
     #    
@@ -147,12 +162,18 @@ def _build_cli_parser():
                       help="Feed Summary")
     parser.add_option("-t", "--techdata", action="store", type="string", dest="techdata",
                       help="Feed Technical Description")
+    parser.add_option("-c", "--category", action="store", type="string", dest="category",
+                      help="Feed Category")
     parser.add_option("-i", "--icon", action="store", type="string", dest="icon",
                       help="Icon File (PNG format)")
+    parser.add_option("-S", "--small-icon", action="store", type="string", dest="small_icon",
+                      help="Small icon file (50x50 pixels) (PNG format)")
     parser.add_option("-I", "--iocs", action="store", type="string", dest="ioc_filename",
                       help="IOC filename")
     parser.add_option("-r", "--report", action="store", type="string", dest="report",
                       help="Report Name")
+    parser.add_option("-g", "--tags", action="store", type="string", dest="tags",
+                      help="Optional comma-delimited report tags")
 
     return parser
 

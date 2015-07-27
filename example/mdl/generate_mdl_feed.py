@@ -2,7 +2,6 @@ import os
 import sys
 import csv
 import time
-import shlex
 import urlparse
 
 from datetime import datetime
@@ -50,7 +49,7 @@ def reports_from_csv(lines):
         for line in unicode_csv_reader(lines):
             if len(line)== 0: continue
             try:
-                rawdate, url, ip, reverse_lookup, desc, registrant, asn, _, _ = line
+                rawdate, url, ip, reverse_lookup, desc, registrant, asn, _, _, _ = line
 
                 #rawdate 2013/10/27_03:06
                 report_date = time.strptime(rawdate, "%Y/%m/%d_%H:%M") 
@@ -93,7 +92,7 @@ def reports_from_csv(lines):
 
             except Exception, err:
                 print "WARNING:  error parsing %s\n%s" % (line, err)
-                continue
+                sys.exit(0) 
     except Exception, err:
         print err
         print line
@@ -115,7 +114,9 @@ def create(localcsv=None):
                 'summary': "Malware Domain List is a non-commercial community project to track domains used by malware." +
                            " This feed contains the most recent 180 days of entries.",
                 'tech_data': "There are no requirements to share any data to receive this feed.",
-                "icon": "mdl.png"
+                'icon': "mdl.png",
+                'icon_small': "mdl.small.jpg",
+                'category': "Open Source"
                 }
 
     # lazy way out 
@@ -140,6 +141,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         localcsv = sys.argv[2]
 
+    print bytes
     bytes = create(localcsv)
     open(outfile, "w").write(bytes)
 
