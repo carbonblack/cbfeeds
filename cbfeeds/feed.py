@@ -134,7 +134,6 @@ class CbFeedInfo(object):
         # check to see if icon_field can be base64 decoded
         for icon_field in ["icon", "icon_small"]:
             try:
-                print icon_fieldl
                 base64.b64decode(self.data[icon_field])
 
             except TypeError, err:
