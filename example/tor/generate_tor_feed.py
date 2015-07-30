@@ -76,7 +76,8 @@ def create():
                 'tech_data': "There are no requirements to share any data to receive this feed.",
                 'icon': 'tor.png',
                 'icon_small': 'tor.small.jpg',
-                'category': 'Open Source'}
+                'category': 'Open Source',
+                }
 
     # lazy way out to get right icon path.  sorry.
     old_cwd = os.getcwd()

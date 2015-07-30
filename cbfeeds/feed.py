@@ -63,9 +63,10 @@ class CbFeed(object):
                 raise CbInvalidFeed("duplicate report id '%s'" % report['id']) 
             reportids.add(report['id'])
 
-    def validate(self, serialized_data=None):
+    def validate(self, pedantic = False, serialized_data=None):
         '''
         validates the feed
+        :param pedantic: when set, perform strict validation
         :param serialized_data: serialized data for the feed
         '''
         if not serialized_data:
@@ -82,12 +83,12 @@ class CbFeed(object):
 
         # validate the feed info
         fi = CbFeedInfo(**data["feedinfo"])
-        fi.validate()
+        fi.validate(pedantic = pedantic)
 
         # validate each report individually
         for rep in data["reports"]:
             report = CbReport(**rep)
-            report.validate()
+            report.validate(pedantic = pedantic)
 
         # validate the reports as a whole
         self.validate_report_list(data["reports"])
@@ -119,7 +120,7 @@ class CbFeedInfo(object):
         self.validate()
         return self.data
 
-    def validate(self):
+    def validate(self, pedantic = False):
         """ a set of checks to validate data before we export the feed"""
 
         if not all([x in self.data.keys() for x in self.required]):
@@ -210,7 +211,7 @@ class CbReport(object):
             if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%*()":
                 raise CbInvalidReport("Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (c, reportid))
  
-    def validate(self):
+    def validate(self, pedantic = False):
         """ a set of checks to validate the report"""
 
         # validate we have all required keys
@@ -223,6 +224,11 @@ class CbReport(object):
         for key in self.data.keys():
             if key not in self.required and key not in self.optional:
                 raise CbInvalidReport("Report contains extra key '%s'" % key)
+
+        # (pedantically) validate only required keys are present
+        if pedantic and len(self.data.keys()) > len(self.required):
+            raise CbInvalidReport("Report contains extra keys: %s" %
+                                  (set(self.data.keys()) - set(self.required)))
 
         # CBAPI-36
         # verify that all fields that should be strings are strings
@@ -278,8 +284,8 @@ class CbReport(object):
         if len(iocs.keys()) == 0:
             raise CbInvalidReport("Report with no IOCs in report %s" % (self.data["id"]))
 
-        # validate that no extra keys are present
-        if len(set(iocs.keys()) - set(self.valid_ioc_types)) > 0:
+        # (pedantically) validate that no extra keys are present
+        if pedantic and len(set(iocs.keys()) - set(self.valid_ioc_types)) > 0:
             raise CbInvalidReport(
                 "Report IOCs section contains extra keys: %s" % (set(iocs.keys()) - set(self.valid_ioc_types)))
 
