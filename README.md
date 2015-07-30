@@ -111,22 +111,37 @@ Each `report` has report metadata and a list of IOCs.
 | `summary`      | REQUIRED | A short description of this feed. | 
 | `tech_data`    | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
 | `icon`         | OPTIONAL | A base64 encoded version of the image to use in the user interface | 
+| `icon_small`   | OPTIONAL | A base64 encoded version of a smaller icon | 
+| `category`     | OPTIONAL | Category of the feed i.e. Open Source, Partner, Connector, First Party etc. |
 
 Notes:
 
 The 'name' field must not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
 
-An example `feedinfo` structure, from the example_tor.py script:
+Explanation of `category` parameters:
+
+| Category Name | Description |
+| ------------- | ----------- |
+| `Partner`     | Proprietary threat intelligence provided to the Threat Intelligence Cloud via a partner agreement. | 
+| `Open Source` | Open Source intelligence that is generally available to the public | 
+| `Bit9 + Carbon Black First Party` | Intelligence generated inside the Threat Intelligence Cloud by the Bit9 and Carbon Black Research team | 
+| `Connectors` | Intelligence connectors from third party technologies Bit9 + Carbon Black have integrated with | 
+| `Carbon Black` | Intelligence based on output from host-based integrations | 
+| `Meta-feed` | Includes a theme-based aggregate of selected intelligence indicators from other feeds |
+
+
+An example `feedinfo` structure, from the generate_tor_feed.py script:
 
 ```
   "feedinfo": {
-    "provider_url": "http://www.dan.me.uk",
-    "display_name": "Tor Exit Nodes",
     "name": "tor",
-    "tech_data": "There are no requirements to share any data to receive this feed.",
+    "display_name": "Tor Exit Nodes",
+    "provider_url": "https://torproject.org/",
     "summary": "This feed is a list of Tor Node IP addresses, updated every 30 minutes.",
-    "version": 1,
-    "icon": "...."
+    "tech_data": "There are no requirements to share any data to receive this feed.",
+    "icon": "tor.png",
+    "icon_small": "tor.small.png",
+    "category": "Open Source"
    }
 ```
 
