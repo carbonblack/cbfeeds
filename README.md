@@ -112,7 +112,7 @@ Each `report` has report metadata and a list of IOCs.
 | `tech_data`    | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
 | `icon`         | OPTIONAL | A base64 encoded version of the image to use in the user interface | 
 | `icon_small`   | OPTIONAL | A base64 encoded version of a smaller icon | 
-| `category`     | OPTIONAL | Category of the feed i.e. Open Source, Partner, Connector, First Party etc.
+| `category`     | OPTIONAL | Category of the feed i.e. Open Source, Partner, Connector, First Party etc. |
 
 Notes:
 
@@ -124,7 +124,7 @@ Explanation of `category` parameters:
 | ------------- | ----------- |
 | `Partner`     | Proprietary threat intelligence provided to the Threat Intelligence Cloud via a partner agreement. | 
 | `Open Source` | Open Source intelligence that is generally available to the public | 
-| `Bit9 + Carbon Black First Party | Intelligence generated inside the Threat Intelligence Cloud by the Bit9 and Carbon Black Research team | 
+| `Bit9 + Carbon Black First Party` | Intelligence generated inside the Threat Intelligence Cloud by the Bit9 and Carbon Black Research team | 
 | `Connectors` | Intelligence connectors from third party technologies Bit9 + Carbon Black have integrated with | 
 | `Carbon Black` | Intelligence based on output from host-based integrations | 
 | `Meta-feed` | Includes a theme-based aggregate of selected intelligence indicators from other feeds |
