@@ -122,7 +122,7 @@ def create_feed(options):
     #
     if options.small_icon:
         bytes = base64.b64encode(open(options.small_icon).read())
-        feedinfo['icon_small']
+        feedinfo['icon_small'] = bytes
   
     # if a feed category was provided, include it in the feed information
     #
