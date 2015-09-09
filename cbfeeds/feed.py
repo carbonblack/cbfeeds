@@ -136,10 +136,12 @@ class CbFeedInfo(object):
         for icon_field in ["icon", "icon_small"]:
             try:
                 base64.b64decode(self.data[icon_field])
-
             except TypeError, err:
                 raise CbIconError("Icon must either be path or base64 data.  \
                                         Path does not exist and base64 decode failed with: %s" % err)
+            except AttributeError as err:
+                # we don't want to cause a ruckus if the icon is missing
+                pass
 
         # all fields in feedinfo must be strings
         for key in self.data.keys():
