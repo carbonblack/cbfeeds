@@ -139,7 +139,7 @@ class CbFeedInfo(object):
             except TypeError, err:
                 raise CbIconError("Icon must either be path or base64 data.  \
                                         Path does not exist and base64 decode failed with: %s" % err)
-            except AttributeError as err:
+            except KeyError as err:
                 # we don't want to cause a ruckus if the icon is missing
                 pass
 
