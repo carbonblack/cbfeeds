@@ -157,6 +157,8 @@ A `report` is a JSON structure with the following entries:
 | `title`        | REQUIRED | A one-line title describing this report.| 
 | `score`        | REQUIRED | The severity of this report from -100 to 100, with 100 most critical.| 
 | `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report id.  The IOC format is described below.| 
+| `tags`         | OPTIONAL | A comma separated list of identifiers to tag the report. |
+| `description`  | OPTIONAL | A description of the report. |
 
 ### iocs
 
@@ -189,7 +191,7 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
       },
       "link": "https://www.dan.me.uk/tornodes",
       "id": "TOR-Node-100.2.142.8",
-      "title": "As of Wed Oct  2 20:09:48 2013 GMT, 100.2.142.8 has been a TOR exit for 26 days, 0:44:42. Contact: Adam Langley <agl@imperialviolet.org>"
+      "title": "As of Wed Oct  2 20:09:48 2013 GMT, 100.2.142.8 has been a TOR exit for 26 days, 0:44:42. Contact: Adam Langley <xxx@xxxviolet.org>"
     },
     {
       "timestamp": 1380773388,
@@ -200,7 +202,7 @@ An example `reports` list with two `report` structures, each with one IPv4 IOC, 
       },
       "link": "https://www.dan.me.uk/tornodes",
       "id": "TOR-Node-100.4.7.69",
-      "title": "As of Wed Oct  2 20:09:48 2013 GMT, 100.4.7.69 has been a TOR exit for 61 days, 2:07:23. Contact: GPG KeyID: 0x1F40CBDC Jeremy <jeremy@acjlaw.net>"
+      "title": "As of Wed Oct  2 20:09:48 2013 GMT, 100.4.7.69 has been a TOR exit for 61 days, 2:07:23. Contact: GPG KeyID: 0x1F40CBDC Jeremy <jeremy@xxxlaw.net>"
     }
   ]
 ```
