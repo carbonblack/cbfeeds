@@ -2,8 +2,6 @@
 import re
 import sys
 import time
-import urllib
-import json
 import optparse
 import socket
 import base64
@@ -87,6 +85,9 @@ def build_reports(options):
    
     if options.tags is not None: 
         fields['tags'] = options.tags.split(',')
+    
+    if options.description is not None:
+        fields['description'] = options.description
     
     if len(ips) > 0:
         fields['iocs']['ipv4'] = ips
