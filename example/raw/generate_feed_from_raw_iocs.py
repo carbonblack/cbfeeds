@@ -1,5 +1,11 @@
 # stdlib imports
-import re , sys , time ,  json , optparse , socket , base64 , hashlib
+import re
+import sys
+import time
+import optparse
+import socket
+import base64
+import hashlib
 
 # cb imports
 sys.path.insert(0, "../../")
@@ -81,7 +87,7 @@ def build_reports(options):
         fields['tags'] = options.tags.split(',')
     
     if options.description is not None:
-        fields['descrpition'] = options.description
+        fields['description'] = options.description
     
     if len(ips) > 0:
         fields['iocs']['ipv4'] = ips
