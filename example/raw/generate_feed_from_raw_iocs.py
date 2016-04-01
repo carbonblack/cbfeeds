@@ -175,6 +175,8 @@ def _build_cli_parser():
                       help="Report Name")
     parser.add_option("-g", "--tags", action="store", type="string", dest="tags",
                       help="Optional comma-delimited report tags")
+    parser.add_option("-D", "--description", action="store", type="string", dest="description",
+                      help="A brief description of the report.")
 
     return parser
 
