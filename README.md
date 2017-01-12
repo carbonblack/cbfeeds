@@ -118,6 +118,14 @@ Notes:
 
 The 'name' field must not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
 
+#### Icon
+
+Recommended size/dpi for regular icon is 370px x 97px, 72 dpi.
+
+#### Small Icon (icon_small)
+
+Recommended size/dpi for small icon is 100px x 100px, 72dpi
+
 Explanation of `category` parameters:
 
 | Category Name | Description |
