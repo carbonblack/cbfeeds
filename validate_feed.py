@@ -40,7 +40,7 @@ def validate_json(contents):
     """
     validate that the file is well-formed JSON
     """
-    return json.loads(contents)
+    return json.loads(contents, strict=False)
 
 
 def validate_feed(feed, pedantic=False):
