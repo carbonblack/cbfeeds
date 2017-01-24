@@ -3,16 +3,14 @@ python-cbfeeds
 """
 
 from setuptools import setup
-import os
-import sys
 
 setup(
-    name='python-cbfeeds',
-    version='0.6.1',
+    name='cbfeeds',
+    version='0.8.0',
     url='http://github.com/carbonblack/cbfeeds',
-    license='',
+    license='MIT',
     author='Carbon Black',
-    author_email='technology-support@carbonblack.com',
+    author_email='dev-support@carbonblack.com',
     description='Carbon Black Alliance Feeds',
     long_description=__doc__,
     packages=['cbfeeds', ],
@@ -23,7 +21,6 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: TBD',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
