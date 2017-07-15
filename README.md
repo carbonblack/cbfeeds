@@ -6,7 +6,7 @@ Use of the Carbon Black Feeds API is governed by the license found in LICENSE.md
 
 ## Overview
 
-Carbon Black 4.0+ ships with support for threat intelligence feeds.  The Indicators of Compromise (IOCs) 
+Carbon Black Response 4.0+ ships with support for threat intelligence feeds.  The Indicators of Compromise (IOCs) 
 contained in the feeds are compared to the sensor data as it arrives on the server.  Any activity matching an 
 IOC is tagged; users can search for the tags and, optionally, register for e-mail alerts.
 
@@ -14,18 +14,22 @@ Feeds allow Carbon Black servers to use freely available threat intelligence, pr
 and provides a mechanism to feed threat indicators from on-premise analytic sources to Carbon Black for verification,
 detection, visibility and analysis.
 
-The Carbon Black 4.0+ server supports three types of indicators:
+The CB Response 4.0+ server supports three types of indicators:
 
   * Binary MD5s
   * IPv4 addresses
   * DNS names
 
-The Carbon Black 5.0+ server adds support for two new types of indicators:
+The CB Response 5.0+ server adds support for two new types of indicators:
 
   * Process Queries (Process Searches)
   * Binary Queries (Binary Searches)
+  
+The CB Response 6.1+ server adds support for one new type of indicator:
 
-Please note that query IOC types have significant differences as compared to MD5s, IPv4 addresses, and DNS names.  Please see notes below regarding their usage.
+  * IPv6 addresses
+
+Please note that query IOC types have significant differences as compared to MD5s, IPv4 and IPv6 addresses, and DNS names.  Please see notes below regarding their usage.
 
 The feed format, described in the "Feed Structure" section below, is designed for simplicity.  This should make it
 easy to add support for feed data from any input source.
@@ -132,8 +136,8 @@ Explanation of `category` parameters:
 | ------------- | ----------- |
 | `Partner`     | Proprietary threat intelligence provided to the Threat Intelligence Cloud via a partner agreement. | 
 | `Open Source` | Open Source intelligence that is generally available to the public | 
-| `Bit9 + Carbon Black First Party` | Intelligence generated inside the Threat Intelligence Cloud by the Bit9 and Carbon Black Research team | 
-| `Connectors` | Intelligence connectors from third party technologies Bit9 + Carbon Black have integrated with | 
+| `Carbon Black First Party` | Intelligence generated inside the Threat Intelligence Cloud by the Carbon Black Research team | 
+| `Connectors` | Intelligence connectors from third party technologies Carbon Black have integrated with | 
 | `Carbon Black` | Intelligence based on output from host-based integrations | 
 | `Meta-feed` | Includes a theme-based aggregate of selected intelligence indicators from other feeds |
 
@@ -170,18 +174,26 @@ A `report` is a JSON structure with the following entries:
 
 ### iocs
 
-CB 4.0 ships with feeds version `1` and supports four kinds of IOCs:
+CB Response 4.0+ ships supports four types of IOCs:
 
 * IPv4 addresses
 * domain names
 * md5s
+
+CB Response 5.0+ supports all 4.0 IOCs and adds one additional type:
+
 * query - this contains query related to modules or events
+
+CB Response 6.1+ supports all 5.0 IOCs and adds one additional type:
+
+* ipv6 addresses
 
 `iocs` is a structure with one or more of these entries:
 
 | name           | status   | description | 
 | -------------- | -------- |-------------| 
-| `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form| 
+| `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form|
+| `ipv6`         | OPTIONAL | A list of IPv6 addresses|
 | `dns`          | OPTIONAL | A list of domain names| 
 | `md5`          | OPTIONAL | A list of md5s|
 | `query`        | OPTIONAL | A query of type "events" or "modules"| 
@@ -274,13 +286,13 @@ As with all feeds, it is highly recommended to provide initial validation of the
 
 ## Performance ramifications of "query" IOC reports
 
-Queries IOCs impose a much higher performance cost on the Carbon Black Enterprise Server than md5, dns, and ip IOCs.  Furthermore, the relative costs of queries can very signficantly.  As a general rule, 'events' queries are more expensive than 'modules' queries.  The use of wildcards, long paths, or multiple terms is also expensive.  
+Queries IOCs impose a much higher performance cost on the CB Response Server than md5, dns, and ip IOCs.  Furthermore, the relative costs of queries can very signficantly.  As a general rule, 'events' queries are more expensive than 'modules' queries.  The use of wildcards, long paths, joined seearches, or multiple terms are also expensive.  
 
 It is recommended that feed developers take care in constructing query IOCs and test against representative server prior to deploying in production.
 
 ## Feed Synchronization 
 
-The Carbon Black server periodically synchronizes enabled feeds.  There are two types of feed synchronization:
+The CB Response server periodically synchronizes enabled feeds.  There are two types of feed synchronization:
 
 * Incremental
 * Full
