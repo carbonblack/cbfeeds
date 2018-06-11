@@ -10,8 +10,6 @@ class CbInvalidFeed(CbException):
 class CbInvalidReport(CbException):
     pass
 
-from feed import CbFeed
-from feed import CbFeedInfo
-from feed import CbReport
-
-
+from .feed import CbFeed
+from .feed import CbFeedInfo
+from .feed import CbReport

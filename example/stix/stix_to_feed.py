@@ -8,15 +8,20 @@ from cbfeeds import CbReport
 from cbfeeds import CbFeed
 from cbfeeds import CbFeedInfo
 
-try:
-    from stix.core import STIXPackage
-    from stix.utils.parser import EntityParser, UnsupportedVersionError
-    from cybox.bindings.file_object import FileObjectType
-    from cybox.bindings.domain_name_object import DomainNameObjectType
-    from cybox.bindings.address_object import AddressObjectType
-except ImportError:
-    print "Error importing required libraries.  Requires python-stix library.  See https://stix.mitre.org/"
-    sys.exit(-1)
+from stix.core import STIXPackage
+from stix.utils.parser import EntityParser, UnsupportedVersionError
+from cybox.bindings.file_object import FileObjectType
+from cybox.bindings.domain_name_object import DomainNameObjectType
+from cybox.bindings.address_object import AddressObjectType
+
+from stix.utils import nsparser
+import mixbox.namespaces
+from mixbox.namespaces import Namespace
+
+ADDITIONAL_NAMESPACES = [
+    Namespace('http://us-cert.gov/ciscp', 'CISCP',
+              'http://www.us-cert.gov/sites/default/files/STIX_Namespace/ciscp_vocab_v1.1.1.xsd')
+]
 
 
 def merge(d1, d2):
@@ -49,7 +54,7 @@ def no_conditionals(obj):
 
     # ... or if they're defined and any equals...
     if obj.apply_condition.lower() == "any" and \
-                    obj.condition.lower() == "equals":
+            obj.condition.lower() == "equals":
         return True
 
     return False
@@ -111,8 +116,8 @@ def parse_observables(observables):
     for observable in observables:
         try:
             merge(iocs, parse_observable(observable))
-        except Exception, err:
-            print "-> Unexpected error parsing observable: %s; continuing." % err
+        except Exception as e:
+            print("-> Unexpected error parsing observable: {0}; continuing.".format(e))
 
     return iocs
 
@@ -126,6 +131,7 @@ def build_report(fname):
     # https://github.com/STIXProject/python-stix/issues/124
     # parser = EntityParser()
     # pkg = parser.parse_xml(fname, check_version=False)
+
     pkg = STIXPackage.from_xml(fname)
 
     iocs = {}
@@ -136,20 +142,20 @@ def build_report(fname):
         for indicator in pkg.indicators:
             iocs = merge(iocs, parse_observables(indicator.observables))
 
-    ts = time.mktime(pkg.timestamp.timetuple()) if pkg.timestamp else int(time.mktime(time.gmtime()))
+    ts = int(time.mktime(pkg.timestamp.timetuple())) if pkg.timestamp else int(time.mktime(time.gmtime()))
     fields = {'iocs': iocs,
               'score': 100,  # does STIX have a severity field?
               'timestamp': ts,
               'link': 'http://stix.mitre.org',
               'id': pkg.id_,
               'title': pkg.stix_header.title,
-    }
+              }
 
     if len(iocs.keys()) == 0 or all(len(iocs[k]) == 0 for k in iocs):
-        print "-> No suitable observables found in %s; skipping." % fname
+        print("-> No suitable observables found in {0}; skipping.".format(fname))
         return None
 
-    print "-> Including %s observables from %s." % (sum(len(iocs[k]) for k in iocs), fname)
+    print("-> Including %s observables from {0}.".format(sum(len(iocs[k]) for k in iocs), fname))
     return CbReport(**fields)
 
 
@@ -193,11 +199,13 @@ def build_reports(input_source):
                 try:
                     rep = build_report(os.path.join(root, f))
                     if rep: reports.append(rep)
-                except UnsupportedVersionError, err:
-                    print "-> Skipping %s\n    UnsupportedVersionError: %s\n    see https://github.com/STIXProject/python-stix/issues/124" % (
-                        f, err)
-                except Exception, err:
-                    print "-> Unexpected error parsing %s: %s; skipping." % (f, err)
+                except UnsupportedVersionError as e:
+                    print("-> Skipping {0}\n"
+                          "UnsupportedVersionError: {1}\n"
+                          "see https://github.com/STIXProject/python-stix/issues/124".format(
+                        f, e))
+                except Exception as e:
+                    print("-> Unexpected error parsing {0}: {1}; skipping.".format(f, e))
 
     return reports
 
@@ -214,7 +222,7 @@ def create(input_source):
                 'summary': "This feed was imported from stix package(s) at %s" % input_source,
                 'tech_data': "There are no requirements to share any data to receive this feed.",
                 'icon': 'images/stix.gif'
-    }
+                }
 
     feedinfo = CbFeedInfo(**feedinfo)
     feed = CbFeed(feedinfo, reports)
@@ -225,9 +233,20 @@ if __name__ == "__main__":
     parser = build_cli_parser()
     options, args = parser.parse_args(sys.argv)
     if not options.input or not options.output:
-        print "-> Must specify and input file/directory and output filename"
+        print("-> Must specify and input file/directory and output filename")
         sys.exit(-1)
+
+
+    #
+    # Adding namespaces that aren't in defaults
+    #
+    def _update_namespaces():
+        for i in ADDITIONAL_NAMESPACES:
+            nsparser.STIX_NAMESPACES.add_namespace(i)
+            mixbox.namespaces.register_namespace(i)
+
+
+    _update_namespaces()
 
     bytes = create(options.input)
     open(options.output, "w").write(bytes)
-    
