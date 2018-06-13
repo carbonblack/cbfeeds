@@ -42,34 +42,37 @@ def get_zeus():
     return reports
 
 
-def get_palevo():
-    reports = []
-    r = requests.get("https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist")
-    lines = r.text.split("\n")
-    domains = []
-    for line in lines:
-        if len(line) < 3: continue
-        if line[0] == "#": continue
-
-        domains.append(line.strip())
-
-    fields = {'iocs': {
-        "dns": domains,
-    },
-        'timestamp': int(time.mktime(time.gmtime())),
-        'link': "https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist",
-        'id': 'abusech-palevo',
-        'title': 'abuse.ch Palevo hit on domain blocklist',
-        'score': 100,
-    }
-    reports.append(CbReport(**fields))
-    return reports
+#
+# Gives 500 error, keeping it for historical reasons
+#
+# def get_palevo():
+#     reports = []
+#     r = requests.get("https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist")
+#     lines = r.text.split("\n")
+#     domains = []
+#     for line in lines:
+#         if len(line) < 3: continue
+#         if line[0] == "#": continue
+#
+#         domains.append(line.strip())
+#
+#     fields = {'iocs': {
+#         "dns": domains,
+#     },
+#         'timestamp': int(time.mktime(time.gmtime())),
+#         'link': "https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist",
+#         'id': 'abusech-palevo',
+#         'title': 'abuse.ch Palevo hit on domain blocklist',
+#         'score': 100,
+#     }
+#     reports.append(CbReport(**fields))
+#    return reports
 
 
 def create():
     reports = []
     reports.extend(get_zeus())
-    reports.extend(get_palevo())
+    #reports.extend(get_palevo())
 
     feedinfo = {'name': 'abusech',
                 'display_name': "abuse.ch Malware Domains",

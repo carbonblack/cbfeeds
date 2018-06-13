@@ -13,6 +13,7 @@ class CbJSONEncoder(json.JSONEncoder):
     def default(self, o):
         return o.dump()
 
+
 class CbFeed(object):
     def __init__(self, feedinfo, reports):
         self.data = {'feedinfo': feedinfo,
@@ -60,10 +61,10 @@ class CbFeed(object):
         # see CBAPI-17
         for report in reports:
             if report['id'] in reportids:
-                raise CbInvalidFeed("duplicate report id '%s'" % report['id']) 
+                raise CbInvalidFeed("duplicate report id '%s'" % report['id'])
             reportids.add(report['id'])
 
-    def validate(self, pedantic = False, serialized_data=None):
+    def validate(self, pedantic=False, serialized_data=None):
         '''
         validates the feed
         :param pedantic: when set, perform strict validation
@@ -83,15 +84,16 @@ class CbFeed(object):
 
         # validate the feed info
         fi = CbFeedInfo(**data["feedinfo"])
-        fi.validate(pedantic = pedantic)
+        fi.validate(pedantic=pedantic)
 
         # validate each report individually
         for rep in data["reports"]:
             report = CbReport(**rep)
-            report.validate(pedantic = pedantic)
+            report.validate(pedantic=pedantic)
 
         # validate the reports as a whole
         self.validate_report_list(data["reports"])
+
 
 class CbFeedInfo(object):
     def __init__(self, **kwargs):
@@ -120,7 +122,7 @@ class CbFeedInfo(object):
         self.validate()
         return self.data
 
-    def validate(self, pedantic = False):
+    def validate(self, pedantic=False):
         """ a set of checks to validate data before we export the feed"""
 
         if not all([x in self.data.keys() for x in self.required]):
@@ -158,7 +160,7 @@ class CbFeedInfo(object):
         if not self.data["name"].isalnum():
             raise CbInvalidFeed(
                 "Feed name %s may only contain a-z, A-Z, 0-9 and must have one character" % self.data["name"])
-        
+
         return True
 
     def __str__(self):
@@ -211,9 +213,11 @@ class CbReport(object):
         # no logic to detect unescaped '%' characters
         for c in q:
             if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%*()":
-                raise CbInvalidReport("Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (c, reportid))
- 
-    def validate(self, pedantic = False):
+                raise CbInvalidReport(
+                    "Unescaped non-reserved character '%s' found in query for report %s; use percent-encoding" % (
+                    c, reportid))
+
+    def validate(self, pedantic=False):
         """ a set of checks to validate the report"""
 
         # validate we have all required keys
@@ -253,9 +257,9 @@ class CbReport(object):
                 if not str(tag).isalnum():
                     raise CbInvalidReport("Tag '%s' is not alphanumeric" % tag)
                 if len(tag) > 32:
-                    raise CbInvalidReport("Tags must be 32 characters or fewer") 
-        
-        # validate score is integer between -100 (if so specified) or 0 and 100
+                    raise CbInvalidReport("Tags must be 32 characters or fewer")
+
+                    # validate score is integer between -100 (if so specified) or 0 and 100
         try:
             int(self.data["score"])
         except ValueError:
@@ -297,14 +301,14 @@ class CbReport(object):
             raise CbInvalidReport(
                 "Report IOCs section for \"query\" contains extra keys: %s for report %s" %
                 (set(iocs.keys()), self.data["id"]))
-        
+
         if query_ioc:
             iocs_query = iocs["query"][0]
-           
+
             # validate that the index_type field exists 
             if "index_type" not in iocs_query.keys():
                 raise CbInvalidReport("Query IOC section for report %s missing index_type" % self.data["id"])
-            
+
             # validate that the index_type is a valid value
             if not iocs_query.get("index_type", None) in self.valid_query_ioc_types:
                 raise CbInvalidReport(
@@ -323,10 +327,10 @@ class CbReport(object):
                 raise CbInvalidReport("Query IOC for report %s missing q= on query" % self.data["id"])
 
             for kvpair in iocs_query["search_query"].split('&'):
-              if 2 != len(kvpair.split('=')):
-                  continue
-              if kvpair.split('=')[0] == 'q':
-                  self.is_valid_query(kvpair.split('=')[1], self.data["id"])
+                if 2 != len(kvpair.split('=')):
+                    continue
+                if kvpair.split('=')[0] == 'q':
+                    self.is_valid_query(kvpair.split('=')[1], self.data["id"])
 
         # validate all md5 fields are 32 characters, just alphanumeric, and 
         # do not include [g-z] and [G-Z] meet the alphanumeric criteria but are not valid in a md5
@@ -372,7 +376,7 @@ class CbReport(object):
         return True
 
     def __str__(self):
-        return "CbReport(%s)" % (self.data.get("title", self.data.get("id", '')) )
+        return "CbReport(%s)" % (self.data.get("title", self.data.get("id", '')))
 
     def __repr__(self):
         return repr(self.data)
