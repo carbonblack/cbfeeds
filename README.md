@@ -65,23 +65,25 @@ defined in the "Feed Structure" section below.
     Resolving deltas: 100% (50/50), done.
     remote: Total 105 (delta 10), reused 0 (delta 0)
 
-#### navigate to the newly-created cbfeeds directory
+#### Navigate to the newly-created cbfeeds directory
 
     [root@localhost carbonblack]# ls
     cbfeeds
     [root@localhost carbonblack]# cd cbfeeds/
     [root@localhost cbfeeds]# ls
-    cbfeeds  generate_feed_from_raw_iocs.py  generate_tor_feed.py  images  README.md  setup.py  validate_feed.py
+    cbfeeds/  LICENSE.md               README.md         setup.py  validate_feed.py
+    example/  percent_encode_query.py  requirements.txt  test.py
 
-#### use the example "generate_tor_feed.py" script to generate a feed from live tor egress IPs
+#### Navigate to the example directory and use the example `generate_tor_feed.py` (inside the example/tor/ directory) script to generate a feed from live tor egress IPs
 
-    [root@localhost cbfeeds]# python generate_tor_feed.py example_tor_feed.feed
-    [root@localhost cbfeeds]# ls -l example_tor_feed.feed 
+    [root@localhost cbfeeds]# cd example/
+    [root@localhost example]# python tor/generate_tor_feed.py example_tor_feed.feed
+    [root@localhost example]# ls -l example_tor_feed.feed 
     -rw-r--r--. 1 root root 2179084 Mar 25 08:09 example_tor_feed.feed
 
-#### use the example "validate_feed.py" script to validate the tor feed (or a feed of your choosing)
+#### Use the example `validate_feed.py` (inside the parent cbfeeds/ directory) script to validate the tor feed (or a feed of your choosing)
 
-    [root@localhost cbfeeds]# python validate_feed.py --feedfile example_tor_feed.feed 
+    [root@localhost cbfeeds]# python validate_feed.py --feedfile example/example_tor_feed.feed 
     -> Validated that file exists and is readable
     -> Validated that feed file is valid JSON
     -> Validated that the feed file includes all necessary CB elements
