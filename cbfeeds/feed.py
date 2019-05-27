@@ -111,7 +111,7 @@ class CbFeedInfo(object):
                 icon_path = self.data.pop(icon_field)
                 try:
                     self.data[icon_field] = base64.b64encode(open(icon_path, "rb").read())
-                except Exception, err:
+                except Exception as err:
                     raise CbIconError("Unknown error reading/encoding icon data: %s" % err)
 
     def dump(self):
@@ -138,7 +138,7 @@ class CbFeedInfo(object):
         for icon_field in ["icon", "icon_small"]:
             try:
                 base64.b64decode(self.data[icon_field])
-            except TypeError, err:
+            except TypeError as err:
                 raise CbIconError("Icon must either be path or base64 data.  \
                                         Path does not exist and base64 decode failed with: %s" % err)
             except KeyError as err:
@@ -147,7 +147,7 @@ class CbFeedInfo(object):
 
         # all fields in feedinfo must be strings
         for key in self.data.keys():
-            if not (isinstance(self.data[key], unicode) or isinstance(self.data[key], str)):
+            if not isinstance(self.data[key], str):
                 raise CbInvalidFeed("FeedInfo field %s must be of type %s, the field \
                                     %s is of type %s " % (key, "unicode", key, type(self.data[key])))
 
@@ -240,7 +240,7 @@ class CbReport(object):
         # verify that all fields that should be strings are strings
         for key in self.typestring:
             if key in self.data.keys():
-                if not isinstance(self.data[key], basestring):
+                if not isinstance(self.data[key], str):
                     raise CbInvalidReport("Report field '%s' must be a string" % key)
 
         # verify that all fields that should be ints are ints
