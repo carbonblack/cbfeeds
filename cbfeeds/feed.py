@@ -254,8 +254,15 @@ class CbReport(object):
         # verify that all fields that should be strings are strings
         for key in self.typestring:
             if key in self.data.keys():
-                if not isinstance(self.data[key], str):
-                    raise CbInvalidReport("Report field '%s' must be a string" % key)
+                if sys.version_info[0] < 3:
+                    if not (isinstance(self.data[key], unicode) or isinstance(self.data[key], str)):
+                        raise CbInvalidFeed("FeedInfo field %s must be of type %s, the field \
+                                        %s is of type %s " % (key, "unicode", key, type(self.data[key])))
+                else:
+                    if not (isinstance(self.data[key], str) or isinstance(self.data[key], bytes)):
+                        raise CbInvalidFeed("FeedInfo field %s must be of type %s, the field \
+                                        %s is of type %s " % (key, "str", key, type(self.data[key])))
+
 
         # verify that all fields that should be ints are ints
         for key in self.typeint:
