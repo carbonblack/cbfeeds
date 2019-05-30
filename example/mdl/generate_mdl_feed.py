@@ -36,7 +36,7 @@ def utf_8_encoder(unicode_csv_data):
         try:
             yield line.encode('utf-8')
         except UnicodeError:
-            print "WARNING: unicode error, skipping %s" % line
+            print("WARNING: unicode error, skipping %s" % line)
             continue
 
 def reports_from_csv(lines):
