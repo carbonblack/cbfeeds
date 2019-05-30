@@ -34,8 +34,8 @@ def get_tor_nodes():
                                   'firstseen': entry['first_seen'],
                                   'lastseen': entry['last_seen'],
                                   'contact': entry.get("contact", "none")})
-        except Exception, err:
-            print "%s while parsing: %s" % (err, entry)
+        except Exception as err:
+            print("%s while parsing: %s" % (err, entry))
     return nodes
 
 
@@ -93,7 +93,7 @@ def create():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "usage: %s [outfile]" % sys.argv[0]
+        print("usage: %s [outfile]" % sys.argv[0])
         sys.exit(0)
     bytes = create()
     open(sys.argv[1], "w").write(bytes)

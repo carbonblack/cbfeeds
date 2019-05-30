@@ -90,10 +90,10 @@ def reports_from_csv(lines):
 
                 reports.append(CbReport(**fields))
 
-            except Exception, err:
-                print "WARNING:  error parsing %s\n%s" % (line, err)
+            except Exception as err:
+                print("WARNING:  error parsing %s\n%s" % (line, err))
                 sys.exit(0) 
-    except Exception, err:
+    except Exception as err:
         print err
         print line
 
