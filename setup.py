@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='cbfeeds',
-    version='0.8.0',
+    version='0.9.0',
     url='http://github.com/carbonblack/cbfeeds',
     license='MIT',
     author='Carbon Black',
