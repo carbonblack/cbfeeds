@@ -3,6 +3,7 @@ import json
 import base64
 import re
 import time
+import sys
 
 from cbfeeds import CbInvalidReport
 from cbfeeds import CbIconError
@@ -15,11 +16,11 @@ class CbJSONEncoder(json.JSONEncoder):
 
 
 class CbFeed(object):
-    def __init__(self, feedinfo, reports, validate=True):
+    def __init__(self, feedinfo, reports):
         self.data = {'feedinfo': feedinfo,
                      'reports': reports}
-        if validate:
-            self.validate()
+       # if validate:
+            #self.validate()
 
     def dump(self, validate=True):
         '''
@@ -112,7 +113,8 @@ class CbFeedInfo(object):
             if icon_field in self.data and os.path.exists(self.data[icon_field]):
                 icon_path = self.data.pop(icon_field)
                 try:
-                    self.data[icon_field] = base64.b64encode(open(icon_path, "rb").read())
+                    with open(icon_path, "rb") as icon_file:
+                        self.data[icon_field] = base64.b64encode(icon_file.read()).decode('ascii')
                 except Exception as err:
                     raise CbIconError("Unknown error reading/encoding icon data: %s" % err)
         if validate:
@@ -123,7 +125,7 @@ class CbFeedInfo(object):
         validates, then dumps the feed info data
         :return: the feed info data
         '''
-        self.validate()
+        # self.validate()
         return self.data
 
     def validate(self, pedantic=False):
@@ -150,10 +152,17 @@ class CbFeedInfo(object):
                 pass
 
         # all fields in feedinfo must be strings
-        for key in self.data.keys():
-            if not isinstance(self.data[key], str):
-                raise CbInvalidFeed("FeedInfo field %s must be of type %s, the field \
+        # String classes are different in python 3
+        if sys.version_info[0] < 3:
+            for key in self.data.keys():
+                if not (isinstance(self.data[key], unicode) or isinstance(self.data[key], str)):
+                    raise CbInvalidFeed("FeedInfo field %s must be of type %s, the field \
                                     %s is of type %s " % (key, "unicode", key, type(self.data[key])))
+        else:
+            for key in self.data.keys():
+                if not (isinstance(self.data[key], str) or isinstance(self.data[key], bytes)):
+                    raise CbInvalidFeed("FeedInfo field %s must be of type %s, the field \
+                                    %s is of type %s " % (key, "str", key, type(self.data[key])))
 
         # certain fields, when present, must not be empty strings
         for key in self.data.keys():
