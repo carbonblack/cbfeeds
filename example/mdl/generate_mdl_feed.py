@@ -67,7 +67,7 @@ def reports_from_csv(lines):
                     host = host.split(":", 1)[0]
 
                 if len(host) <= 3:
-                    print "WARNING: no domain, skipping %s" % line
+                    print("WARNING: no domain, skipping %s" % line)
                     continue
 
                 # avoid duplicate report ids
