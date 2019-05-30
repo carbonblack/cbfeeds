@@ -15,9 +15,11 @@ class CbJSONEncoder(json.JSONEncoder):
 
 
 class CbFeed(object):
-    def __init__(self, feedinfo, reports):
+    def __init__(self, feedinfo, reports, validate=True):
         self.data = {'feedinfo': feedinfo,
                      'reports': reports}
+        if validate:
+            self.validate()
 
     def dump(self, validate=True):
         '''
@@ -96,7 +98,7 @@ class CbFeed(object):
 
 
 class CbFeedInfo(object):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs, validate=True):
         # these fields are required in every feed descriptor
         self.required = ["name", "display_name",
                          "summary", "tech_data", "provider_url"]
@@ -113,6 +115,8 @@ class CbFeedInfo(object):
                     self.data[icon_field] = base64.b64encode(open(icon_path, "rb").read())
                 except Exception as err:
                     raise CbIconError("Unknown error reading/encoding icon data: %s" % err)
+        if validate:
+            self.validate()
 
     def dump(self):
         '''
@@ -171,7 +175,7 @@ class CbFeedInfo(object):
 
 
 class CbReport(object):
-    def __init__(self, allow_negative_scores=False, **kwargs):
+    def __init__(self, allow_negative_scores=False, validate=True,  **kwargs):
 
         # negative scores introduced in CB 4.2
         # negative scores indicate a measure of "goodness" versus "badness"
@@ -199,9 +203,10 @@ class CbReport(object):
             kwargs["timestamp"] = int(time.mktime(time.gmtime()))
 
         self.data = kwargs
+        if validate:
+            self.validate()
 
     def dump(self):
-        self.validate()
         return self.data
 
     def is_valid_query(self, q, reportid):
