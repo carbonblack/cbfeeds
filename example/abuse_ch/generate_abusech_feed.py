@@ -100,7 +100,7 @@ def create():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "usage: generate_abuse.ch_feed.py [outfile]"
+        print("usage: generate_abuse.ch_feed.py [outfile]")
         sys.exit()
 
     feed_created = create()
