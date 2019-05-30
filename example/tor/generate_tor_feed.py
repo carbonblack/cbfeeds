@@ -2,7 +2,7 @@
 import os
 import sys
 import time
-import urllib
+import requests
 import json
 
 # third part lib imports
@@ -17,8 +17,8 @@ from cbfeeds import CbFeedInfo
 def get_tor_nodes():
     nodes = []
     url = "https://onionoo.torproject.org/details?type=relay&running=true"
-    jsonurl = urllib.urlopen(url)
-    text = json.loads(jsonurl.read())
+    jsonurl = requests.get(url)
+    text = jsonurl.json()
     for entry in text['relays']:
         try:
             for address in entry['or_addresses']:
