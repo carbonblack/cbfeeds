@@ -98,7 +98,7 @@ class CbFeed(object):
 
 
 class CbFeedInfo(object):
-    def __init__(self, **kwargs, validate=True):
+    def __init__(self, validate=True, **kwargs):
         # these fields are required in every feed descriptor
         self.required = ["name", "display_name",
                          "summary", "tech_data", "provider_url"]
@@ -175,7 +175,7 @@ class CbFeedInfo(object):
 
 
 class CbReport(object):
-    def __init__(self, allow_negative_scores=False, validate=True,  **kwargs):
+    def __init__(self,  allow_negative_scores=False, validate=True, **kwargs):
 
         # negative scores introduced in CB 4.2
         # negative scores indicate a measure of "goodness" versus "badness"
