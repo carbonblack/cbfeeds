@@ -22,7 +22,7 @@ class CbFeed(object):
        # if validate:
             #self.validate()
 
-    def dump(self, validate=True):
+    def dump(self, validate=True, sort_keys=True):
         '''
         dumps the feed data
         :param validate: is set, validates feed before dumping
@@ -30,7 +30,7 @@ class CbFeed(object):
         '''
         if validate:
             self.validate()
-        return json.dumps(self.data, cls=CbJSONEncoder, indent=2)
+        return json.dumps(self.data, cls=CbJSONEncoder, indent=2, sort_keys=sort_keys)
 
     def __repr__(self):
         return repr(self.data)
