@@ -18,7 +18,7 @@ def build_cli_parser():
         "-f",
         "--feed_filename",
         type=str,
-        help="Feed Filename to validate",
+        help="Feed Filename(s) to validate",
         required=True,
         nargs='+')
     cmd_parser.add_argument(
