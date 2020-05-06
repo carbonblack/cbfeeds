@@ -44,8 +44,12 @@ class CbFeed(object):
         for report in data["reports"]:
             for md5 in report.get("iocs", {}).get("md5", []):
                 yield {"type": "md5", "ioc": md5, "report_id": report.get("id", "")}
+            for sah256 in report.get("iocs", {}).get("sha256", []):
+                yield {"type": "sha256", "ioc": md5, "report_id": report.get("id", "")}
             for ip in report.get("iocs", {}).get("ipv4", []):
                 yield {"type": "ipv4", "ioc": ip, "report_id": report.get("id", "")}
+            for ip in report.get("iocs", {}).get("ipv6", []):
+                yield {"type": "ipv6", "ioc": ip, "report_id": report.get("id", "")}
             for domain in report.get("iocs", {}).get("dns", []):
                 yield {"type": "dns", "ioc": domain, "report_id": report.get("id", "")}
 
@@ -190,7 +194,7 @@ class CbReport(object):
         self.optional = ["tags", "description"]
 
         # valid IOC types are "md5", "ipv4", "dns", "query"
-        self.valid_ioc_types = ["md5", "ipv4", "dns", "query"]
+        self.valid_ioc_types = ["md5", "sha256", "ipv6", "ipv4", "dns", "query"]
 
         # valid index_type options for "query" IOC
         self.valid_query_ioc_types = ["events", "modules"]
@@ -342,6 +346,16 @@ class CbReport(object):
             for c in "ghijklmnopqrstuvwxyz":
                 if c in md5 or c.upper() in md5:
                     raise CbInvalidReport("Malformed md5 (%s) in IOC list for report %s" % (md5, self.data["id"]))
+
+        for sha256 in iocs.get("sha256", []):
+            if 64 != len(sha256):
+                raise CbInvalidReport("Invalid sha256 length for sha256 (%s) for report %s" % (sha256, self.data["id"]))
+            if not md5.isalnum():
+                raise CbInvalidReport("Malformed sha256 (%s) in IOC list for report %s" % (sha256, self.data["id"]))
+            for c in "ghijklmnopqrstuvwxyz":
+                if c in sha256 or c.upper() in sha256:
+                    raise CbInvalidReport("Malformed sha256 (%s) in IOC list for report %s" % (sha256, self.data["id"]))
+
 
                     # validate all IPv4 fields pass socket.inet_ntoa()
         import socket
