@@ -2,7 +2,7 @@
 import os
 import sys
 import time
-import urllib
+import requests
 import json
 
 # third part lib imports
@@ -17,8 +17,8 @@ from cbfeeds import CbFeedInfo
 def get_tor_nodes():
     nodes = []
     url = "https://onionoo.torproject.org/details?type=relay&running=true"
-    jsonurl = urllib.urlopen(url)
-    text = json.loads(jsonurl.read())
+    jsonurl = requests.get(url)
+    text = jsonurl.json()
     for entry in text['relays']:
         try:
             for address in entry['or_addresses']:
@@ -34,8 +34,8 @@ def get_tor_nodes():
                                   'firstseen': entry['first_seen'],
                                   'lastseen': entry['last_seen'],
                                   'contact': entry.get("contact", "none")})
-        except Exception, err:
-            print "%s while parsing: %s" % (err, entry)
+        except Exception as err:
+            print("%s while parsing: %s" % (err, entry))
     return nodes
 
 
@@ -93,7 +93,7 @@ def create():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "usage: %s [outfile]" % sys.argv[0]
+        print("usage: %s [outfile]" % sys.argv[0])
         sys.exit(0)
     bytes = create()
     open(sys.argv[1], "w").write(bytes)

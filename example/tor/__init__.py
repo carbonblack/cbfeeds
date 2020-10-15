@@ -1,1 +1,1 @@
-from generate_tor_feed import create
+from .generate_tor_feed import create
