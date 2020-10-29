@@ -1,4 +1,4 @@
-# Carbon Black Feeds [![Build Status](https://travis-ci.org/carbonblack/cbfeeds.svg?branch=master)](https://travis-ci.org/carbonblack/cbfeeds) 
+# Carbon Black Feeds 
 
 
 ## License
@@ -29,6 +29,15 @@ The CB Response 5.0+ server adds support for two new types of indicators:
 The CB Response 6.1+ server adds support for one new type of indicator:
 
   * IPv6 addresses
+  
+The CB Response 7.0+ server adds support for one new type of indicator:
+
+  * Binary SHA-256
+  
+The CB Response 7.3+ server adds support for two new types of indicator:
+
+  * Ja3 hash
+  * Ja3s hash
 
 Please note that query IOC types have significant differences as compared to MD5s, IPv4 and IPv6 addresses, and DNS names.  Please see notes below regarding their usage.
 

@@ -1,13 +1,11 @@
-#
-# CARBON BLACK FEED GEN TESTS
-# Copyright, Bit9, Inc 2014
-#
+#  coding: utf-8
+#  Carbon Black EDR Copyright © 2013-2020 VMware, Inc. All Rights Reserved.
+################################################################################
 
 import unittest
-import sys
-import os
 
-class CbFeedTest(unittest.TestCase):
+
+class TestCbFeedExamples(unittest.TestCase):
     def test_mdl(self):
         import example.mdl as mdl
         mdl.create()
@@ -19,6 +17,7 @@ class CbFeedTest(unittest.TestCase):
     def test_abusech(self):
         import example.abuse_ch as ach
         ach.create()
+
 
 if __name__ == '__main__':
     # run the unit tests
