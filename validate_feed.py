@@ -75,7 +75,7 @@ def validate_feed(feed: Dict[str, Any], pedantic: bool = False) -> cbfeeds.CbFee
     Validate that the file is valid as compared to the CB feeds schema.
 
     :param feed: the digested feed
-    :param pedantic: If True, gect for invalid JSON structures
+    :param pedantic: If True, perform pedantic validation
     :return: CbFeed object
     """
     # verify that we have both of the required feedinfo and reports elements
@@ -146,7 +146,7 @@ def validation_cycle(filename: str):
         contents = validate_file(feed_filename)
         logger.info(" ... validated that file exists and is readable!")
     except Exception as err:
-        logger.error(f" ... nable to validate that file exists and is readable:\n {err}")
+        logger.error(f" ... unable to validate that file exists and is readable:\n {err}")
         sys.exit(0)
 
     try:

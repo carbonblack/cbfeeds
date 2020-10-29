@@ -6,8 +6,8 @@ CHANGELOG.md
  * Converted to python3
  * Added handling of sha256, ja3, ja3s and event_query reports
  * Added unit tests
- * removed abuse_ch example (zeus tracker)
-    + ZeuS Tracker has been discontinued on Jul 8th, 2019
+
+> _NOTE: Examples not converted at this time!_
 
 ## v0.8.0
 #### Features
