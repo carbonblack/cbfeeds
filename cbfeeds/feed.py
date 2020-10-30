@@ -61,14 +61,12 @@ class CbFeedInfo(object):
 
         for icon_field in ["icon", "icon_small"]:
             if icon_field in self.data and self.data[icon_field] is not None and self.data[icon_field] != "":
-                to_check = self.data[icon_field]
-
                 # Check to see if it is base64 encodable data (no strict check)
-                if is_base64(to_check)[0]:  # looks to be valid base64, as far as we can tell (no encoding check)
+                if is_base64(self.data[icon_field])[0]:  # looks to be valid base64, as far as we can tell
                     continue
 
                 # Failed decoding check, check for path
-                if os.path.exists(to_check):
+                if os.path.exists(self.data[icon_field]):
                     icon_path = self.data.pop(icon_field)
                     try:
                         with open(icon_path, "rb") as icon_file:
@@ -77,7 +75,7 @@ class CbFeedInfo(object):
                         raise CbIconError(f"Unknown error reading/encoding {icon_field} data: {err}")
 
                 # not a path, may be data
-                ok, err = is_base64(to_check, strict=True)
+                ok, err = is_base64(self.data[icon_field], strict=True)
                 if not ok:
                     raise CbIconError(f"Unknown error reading/encoding {icon_field} data: {err}")
 

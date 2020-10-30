@@ -4,10 +4,13 @@
 
 
 import base64
+import os
 
 import cbfeeds
 from cbfeeds.feed import CbFeedInfo
 from common import TestCommon
+
+RESOURCES = os.path.abspath(os.path.join(os.path.dirname(__file__), "resources"))
 
 
 class TestCbFeedInfoMethods(TestCommon):
@@ -80,12 +83,20 @@ class TestCbFeedInfoMethods(TestCommon):
         Verify that bad encoding for the icon field is detected.
         """
         info, _ = self._load_feed_file()
-        info['feedinfo']['icon'] = info['feedinfo']['icon_small'] + "%$"
+        info['feedinfo']['icon'] = info['feedinfo']['icon'] + "%$"
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbIconError as err:
             assert "Unknown error reading/encoding icon data: Non-base64 digit found" in err.args[0]
+
+    def test_02d_init_icon_path(self):
+        """
+        Verify that get_data() works as expected.
+        """
+        info, _ = self._load_feed_file()
+        info['feedinfo']['icon'] = os.path.join(RESOURCES, "taxii-logov2.png")
+        CbFeedInfo(**info['feedinfo'])
 
     def test_03_get_data(self):
         """
