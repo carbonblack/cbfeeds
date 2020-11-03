@@ -978,20 +978,32 @@ class TestCbReportMethods(TestCommon):
             assert ("Report 'WithDns', field 'iocs', 'dns' is invalid : foobar.aaaaaaaaaabbbbbbbbbbcccccccccc"
                     "ddddddddddeeeeeeeeeeffffffffffgggggggggg.com") in err.args[0]
 
-    def test_20e_neg_validate_dns_ioc_octet_starts_with_number(self):
+    def test_20e_validate_dns_ioc_octet_starts_with_number(self):
+        """
+        Verify that dns entries with octets starting with a number are allowed when not pedantic (as seen in
+        example test feeds).
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][6]['iocs']['dns'][0] = "foobar.4chan.com"
+        CbReport(**info['reports'][6])
+
+    def test_20f_neg_validate_dns_ioc_octet_starts_with_number_pedantic(self):
         """
         Verify that dns entries with octets starting with a number are detected.
         """
         info, _ = self._load_feed_file()
+        del info['reports'][6]['description']
+        del info['reports'][6]['tags']
         info['reports'][6]['iocs']['dns'][0] = "foobar.4chan.com"
+        cr = CbReport(**info['reports'][6])
 
         try:
-            CbReport(**info['reports'][6])
+            cr.validate(pedantic=True)
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithDns', field 'iocs', 'dns' is invalid : foobar.4chan.com" in err.args[0]
 
-    def test_20f_neg_validate_dns_ioc_octet_starts_with_hyphen(self):
+    def test_20g_neg_validate_dns_ioc_octet_starts_with_hyphen(self):
         """
         Verify that dns entries with octets starting with a number are detected.
         """

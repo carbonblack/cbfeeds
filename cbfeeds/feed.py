@@ -428,8 +428,13 @@ class CbReport(object):
                 raise CbInvalidReport(f"{rid}, field 'iocs', 'dns' value has too many octets ({dns})")
 
             # parts defined as per https://datatracker.ietf.org/doc/rfc1035/?include_text=1, section 2.3.1
+            # However, examples draw upon sources that provide domains that seem to break this, so we will
+            # leav the strict validation for pedantic mode only.
             for part in parts:
-                x = re.findall(r'^[a-zA-Z][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?$', part)
+                if pedantic:
+                    x = re.findall(r'^[a-zA-Z][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?$', part)
+                else:
+                    x = re.findall(r'^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?$', part)
                 if len(x) == 0:
                     raise CbInvalidReport(f"{rid}, field 'iocs', 'dns' is invalid : {dns}")
 
