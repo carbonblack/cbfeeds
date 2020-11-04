@@ -13,6 +13,7 @@ class TestCbFeedExamples(unittest.TestCase):
 
     def test_mdl(self):
         import example.mdl as mdl
+        mdl.generate_mdl_feed.DAYS_BACK = None  # get all data
         mdl.create()
 
     def test_tor(self):

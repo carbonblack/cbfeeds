@@ -53,11 +53,14 @@ def validate_file(filename: str) -> str:
     :param filename: The name of the file to read
     :return: file contents
     """
-    if not os.path.exists(filename):
-        raise cbfeeds.CbException(f"No such feed file: {filename}")
+    if filename.strip() == "" or not os.path.exists(filename):
+        raise cbfeeds.CbException(f"No such feed file: `{filename}`")
 
-    with open(filename, 'r') as fp:
-        return fp.read()
+    try:
+        with open(filename, 'r') as fp:
+            return fp.read()
+    except Exception as err:
+        raise cbfeeds.CbException(f"Unable to read feed file: `{filename}`: {err}")
 
 
 def validate_json(contents: str) -> Dict[str, Any]:
@@ -67,7 +70,10 @@ def validate_json(contents: str) -> Dict[str, Any]:
     :param contents: file contents in supposed JSON format
     :return: json object
     """
-    return json.loads(contents)
+    try:
+        return json.loads(contents)
+    except Exception as err:
+        raise cbfeeds.CbException(f"Unable to process feed JSON: {err}")
 
 
 def validate_feed(feed: Dict[str, Any], pedantic: bool = False) -> cbfeeds.CbFeed:
@@ -85,11 +91,11 @@ def validate_feed(feed: Dict[str, Any], pedantic: bool = False) -> cbfeeds.CbFee
         raise cbfeeds.CbException("No 'reports' element found!")
 
     # Create the cbfeed object
-    feed = cbfeeds.CbFeed(feed["feedinfo"], feed["reports"])
+    feed = cbfeeds.CbFeed(feed["feedinfo"], feed["reports"], strict=pedantic)
 
     # Validate the feed -- this validates that all required fields are present, and that
     #    all required values are within valid ranges
-    feed.validate(pedantic)
+    feed.validate()
 
     return feed
 
@@ -132,39 +138,33 @@ def gen_include_exclude_sets(include_filename: str = None, exclude_filename: str
     return include, exclude
 
 
-def validation_cycle(filename: str):
+def validation_cycle(filename: str) -> bool:
     """
     Generate include and exclude (whitelist and blacklist) sets of indicators. Feed validation will fail if a feed
     ioc is blacklisted unless it is also whitelisted.
 
-    :param filename: filename containg feed information
+    :param filename: filename contaning feed information
+    :return: False if there were problems, True if ok
     """
     include, exclude = gen_include_exclude_sets(options.include, options.exclude)
 
     try:
-        logger.info(f"Testing feed {filename}...")
-        contents = validate_file(feed_filename)
-        logger.info(" ... validated that file exists and is readable!")
+        contents = validate_file(filename)
     except Exception as err:
-        logger.error(f" ... unable to validate that file exists and is readable:\n {err}")
-        sys.exit(0)
+        logger.error(f"Feed file invalid: {err}")
+        return False
 
     try:
         jsondict = validate_json(contents)
-        logger.info(" ... validated that feed file is valid JSON")
     except Exception as err:
-        logger.error(f" ... unable to validate that file is valid JSON:\n{err}")
-        sys.exit(0)
+        logger.error(f"Feed json for `{filename}` is invalid: {err}")
+        return False
 
     try:
-        feed = validate_feed(jsondict, pedantic=options.pedantic)
-        logger.info(" ... validated that the feed file includes all necessary CB elements")
-        logger.info(" ... validated that all element values are within CB feed requirements")
-        if options.pedantic:
-            logger.info(" ... validated that the feed includes no non-CB elements")
+        feed = validate_feed(jsondict)
     except Exception as err:
-        logger.error(f" ... unable to validate that the file is a valid CB feed:\n{err}")
-        sys.exit(0)
+        logger.error(f"Feed `{filename}` is invalid: {err}")
+        return False
 
     if len(exclude) > 0 or len(include) > 0:
         try:
@@ -172,7 +172,11 @@ def validation_cycle(filename: str):
             logger.info(" ... validated against include and exclude lists")
         except Exception as err:
             logger.error(f" ... unnable to validate against the include and exclude lists:\n{err}")
-            sys.exit(0)
+            return False
+
+    extra = "" if not options.pedantic else " and contains no non-CB elements"
+    logger.info(f"Feed `{filename}` is good{extra}!")
+    return True
 
 
 ################################################################################

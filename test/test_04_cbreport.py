@@ -13,7 +13,53 @@ class TestCbReportMethods(TestCommon):
     Validate the methods in the CbReport class.
     """
 
-    def test_01_init_no_timestamp(self):
+    def test_00a_init_unknown_key(self):
+        """
+        Verify that an initialized feedinfo object only retains known keys.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][0]['foobar'] = "should vanish"
+        cfi = CbReport(**info['reports'][0])
+        assert "foobar" not in cfi.data
+
+    def test_00b_neg_init_unknown_key_strict(self):
+        """
+        Verify that an initialized feedinfo object only retains known keys.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][0]['foobar'] = "should vanish"
+        try:
+            CbReport(strict=True, **info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report includes unknown field: foobar" in err.args[0]
+
+    def test_01a_update_unknown_key(self):
+        """
+        Verify that updated feedinfo data only retains known keys.
+        """
+        info, _ = self._load_feed_file()
+        cfi = CbReport(**info['reports'][0])
+        info['reports'][0]['foobar'] = "should vanish"
+        cfi.data = info['reports'][0]
+        assert "foobar" not in cfi.data
+
+    def test_01b_neg_update_unknown_key_strict(self):
+        """
+        Verify that updated feedinfo data only retains known keys.
+        """
+        info, _ = self._load_feed_file()
+        cfi = CbReport(strict=True, **info['reports'][0])
+        info['reports'][0]['foobar'] = "should vanish"
+        try:
+            cfi.data = info['reports'][0]
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report includes unknown field: foobar" in err.args[0]
+
+    # ----- Tests exclusive to the __init__() method ------------------------------
+
+    def test_02_init_no_timestamp(self):
         """
         Verify that on init a tampstamp is created, if not provided.
         """
@@ -22,29 +68,24 @@ class TestCbReportMethods(TestCommon):
             del info['reports'][0]['timestamp']
 
         rp = CbReport(validate=False, **info['reports'][0])
-        assert rp.get_data()['timestamp'] is not None
+        assert rp.data['timestamp'] is not None
 
-    def test_02_get_data(self):
+    # ----- validate() method testing --------------------------------------------------
+
+    def test_03a_neg_validate_id_missing(self):
         """
-        Verify that get_data() works as expected.
+        Verify that missing "id" is detected.
         """
         info, _ = self._load_feed_file()
-        problems = []
+        del info['reports'][0]['id']
 
-        for report in info['reports']:
-            rp = CbReport(validate=False, **report)
-            check = rp.get_data()
+        try:
+            CbReport(**info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report missing required field(s): id" in err.args[0]
 
-            for key, value in check.items():
-                if report[key] != value:
-                    problems.append(f"Key `{key}` of report `{report.id}` in stored data ({value}) differs from"
-                                    f" original ({report[key]})")
-
-        if len(problems) > 0:
-            mess = "\n  ".join(problems)
-            self.fail(f"Validation failures:\n  {mess}")
-
-    def test_03a_neg_validate_iocs_missing(self):
+    def test_03b_neg_validate_iocs_missing(self):
         """
         Verify that missing "iocs" is detected.
         """
@@ -57,7 +98,33 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report missing required field(s): iocs" in err.args[0]
 
-    def test_03b_neg_validate_timestamp_missing(self):
+    def test_03c_neg_validate_link_missing(self):
+        """
+        Verify that missing "link" is detected.
+        """
+        info, _ = self._load_feed_file()
+        del info['reports'][0]['link']
+
+        try:
+            CbReport(**info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report missing required field(s): link" in err.args[0]
+
+    def test_03d_neg_validate_score_missing(self):
+        """
+        Verify that missing "score" is detected.
+        """
+        info, _ = self._load_feed_file()
+        del info['reports'][0]['score']
+
+        try:
+            CbReport(**info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report missing required field(s): score" in err.args[0]
+
+    def test_03e_neg_validate_timestamp_missing(self):
         """
         Verify that missing "timestamp" is detected.
 
@@ -73,20 +140,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report missing required field(s): timestamp" in err.args[0]
 
-    def test_03c_neg_validate_link_missing(self):
-        """
-        Verify that missing "link" is detected.
-        """
-        info, _ = self._load_feed_file()
-        del info['reports'][0]['link']
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report missing required field(s): link" in err.args[0]
-
-    def test_03d_neg_validate_title_missing(self):
+    def test_03f_neg_validate_title_missing(self):
         """
         Verify that missing "title" is detected.
         """
@@ -99,143 +153,25 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report missing required field(s): title" in err.args[0]
 
-    def test_03e_neg_validate_id_missing(self):
-        """
-        Verify that missing "id" is detected.
-        """
-        info, _ = self._load_feed_file()
-        del info['reports'][0]['id']
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report missing required field(s): id" in err.args[0]
-
-    def test_03f_neg_validate_score_missing(self):
-        """
-        Verify that missing "score" is detected.
-        """
-        info, _ = self._load_feed_file()
-        del info['reports'][0]['score']
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report missing required field(s): score" in err.args[0]
-
-    def test_04_neg_validate_extra_key(self):
-        """
-        Verify that extra key not on the optional or required list is detected.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][0]['foobar'] = "Bogus"
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithMd5' contains extra keys: ['foobar']" in err.args[0]
-
-    def test_05a_validate_optional_description(self):
-        """
-        Verify that optional description can be specified.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][0]['description'] = "This is allowed"
-        CbReport(**info['reports'][0])
-
-    def test_05b_validate_optional_description_missing(self):
+    def test_04a_validate_optional_description_missing(self):
         """
         Verify that description is optional and not required.
         """
         info, _ = self._load_feed_file()
         del info['reports'][0]['description']
-        CbReport(**info['reports'][0])
+        cr = CbReport(**info['reports'][0])
+        assert 'description' not in cr.data
 
-    def test_05c_validate_optional_tags(self):
-        """
-        Verify that optional tags can be specified.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][0]['tags'] = ["harmless", "test", "md5"]
-        CbReport(**info['reports'][0])
-
-    def test_05d_validate_optional_tags_missing(self):
+    def test_04b_validate_optional_tags_missing(self):
         """
         Verify that tags is optional list is detected.
         """
         info, _ = self._load_feed_file()
         del info['reports'][0]['tags']
-        CbReport(**info['reports'][0])
-
-    def test_06a_validate_pedantic(self):
-        """
-        Verify that only required keys allowed when pedantic specifed.
-        """
-        info, _ = self._load_feed_file()
         cr = CbReport(**info['reports'][0])
+        assert 'tags' not in cr.data
 
-        try:
-            cr.validate(pedantic=True)
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithMd5' contains extra keys: ['description', 'tags']" in err.args[0]
-
-    def test_06b_validate_pedantic_ok(self):
-        """
-        Verify that pedantic reports work as expected.
-        """
-        info, _ = self._load_feed_file()
-        del info['reports'][0]['tags']
-        del info['reports'][0]['description']
-        cr = CbReport(**info['reports'][0])
-
-        cr.validate(pedantic=True)
-
-        self.typestring = ["link", "title", "id", "description"]
-
-    def test_07a_neg_validate_link_not_str(self):
-        """
-        Verify that "link" not a string is detected.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][0]['link'] = 42
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithMd5', field 'link', must be of type str or bytes" in err.args[0]
-
-    def test_07b_neg_validate_title_not_str(self):
-        """
-        Verify that "title" not a string is detected.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][0]['title'] = 42
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithMd5', field 'title', must be of type str or bytes" in err.args[0]
-
-    def test_07c_neg_validate_id_not_str(self):
-        """
-        Verify that "id" not a string is detected.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][0]['id'] = 42
-
-        try:
-            CbReport(**info['reports'][0])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report '42', field 'id', must be of type str or bytes" in err.args[0]
-
-    def test_07d_neg_validate_description_not_str(self):
+    def test_05a_neg_validate_description_not_str(self):
         """
         Verify that "description" not a string is detected.
         """
@@ -248,20 +184,46 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'description', must be of type str or bytes" in err.args[0]
 
-    def test_08a_neg_validate_timestamp_not_int(self):
+    def test_05b_neg_validate_id_not_str(self):
         """
-        Verify that "timestamp" not a int is detected.
+        Verify that "id" not a string is detected.
         """
         info, _ = self._load_feed_file()
-        info['reports'][0]['timestamp'] = "bogus"
+        info['reports'][0]['id'] = 42
 
         try:
             CbReport(**info['reports'][0])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithMd5', field 'timestamp', must be an int" in err.args[0]
+            assert "Report '42', field 'id', must be of type str or bytes" in err.args[0]
 
-    def test_08b_neg_validate_score_not_int(self):
+    def test_05c_neg_validate_link_not_str(self):
+        """
+        Verify that "link" not a string is detected.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][0]['link'] = 42
+
+        try:
+            CbReport(**info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report 'WithMd5', field 'link', must be of type str or bytes" in err.args[0]
+
+    def test_05d_neg_validate_title_not_str(self):
+        """
+        Verify that "title" not a string is detected.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][0]['title'] = 42
+
+        try:
+            CbReport(**info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report 'WithMd5', field 'title', must be of type str or bytes" in err.args[0]
+
+    def test_06a_neg_validate_score_not_int(self):
         """
         Verify that "score" not a int is detected.
         """
@@ -274,7 +236,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'score', must be an int" in err.args[0]
 
-    def test_08c_neg_validate_score_is_float(self):
+    def test_06b_validate_score_is_float(self):
         """
         Verify that "score" as a float is converted to int.
         """
@@ -283,7 +245,20 @@ class TestCbReportMethods(TestCommon):
         cr = CbReport(**info['reports'][0])
         assert cr.data['score'] == 15
 
-    def test_09a_neg_validate_tags_not_list(self):
+    def test_06c_neg_validate_timestamp_not_int(self):
+        """
+        Verify that "timestamp" not a int is detected.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][0]['timestamp'] = "bogus"
+
+        try:
+            CbReport(**info['reports'][0])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report 'WithMd5', field 'timestamp', must be an int" in err.args[0]
+
+    def test_07a_neg_validate_tags_not_list(self):
         """
         Verify that if "tags" is not a list we detect this.
         """
@@ -296,7 +271,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'tags', must be a list of str" in err.args[0]
 
-    def test_09b_neg_validate_tags_not_str_entry(self):
+    def test_07b_neg_validate_tags_not_str_entry(self):
         """
         Verify that non-string entries in "tags" are detected.
         """
@@ -309,7 +284,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'tag', has entry not a string" in err.args[0]
 
-    def test_09c_neg_validate_tags_not_alphanumeric_entry(self):
+    def test_07c_neg_validate_tags_not_alphanumeric_entry(self):
         """
         Verify that non-alphanumeric string entries in "tags" are detected.
         """
@@ -322,7 +297,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'tag', has an entry that is not alphanumeric" in err.args[0]
 
-    def test_09d_neg_validate_tags_empty_string_entry(self):
+    def test_07d_neg_validate_tags_empty_string_entry(self):
         """
         Verify that string entries that are empty string are detected.
         """
@@ -335,7 +310,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'tag', has an entry that is not 1-32 characters in length" in err.args[0]
 
-    def test_09e_neg_validate_tags_long_string_entry(self):
+    def test_07e_neg_validate_tags_long_string_entry(self):
         """
         Verify that string entries that are over 32 characters are detected.
         """
@@ -348,7 +323,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'tag', has an entry that is not 1-32 characters in length" in err.args[0]
 
-    def test_10a_neg_validate_score_negative_when_disallowed(self):
+    def test_08a_neg_validate_score_negative_when_disallowed(self):
         """
         Verify that when allow_negative_scores is False we detect negative scores.
         """
@@ -361,7 +336,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'score' (-10), out of range 0 to 100" in err.args[0]
 
-    def test_10b_validate_score_negative_when_allowed(self):
+    def test_08b_validate_score_negative_when_allowed(self):
         """
         Verify that when allow_negative_scores is True we allow negative scores.
         """
@@ -369,7 +344,7 @@ class TestCbReportMethods(TestCommon):
         info['reports'][0]['score'] = -10
         CbReport(**info['reports'][0], allow_negative_scores=True)
 
-    def test_10c_neg_validate_score_too_low(self):
+    def test_08c_neg_validate_score_too_low(self):
         """
         Verify that we detect scores too low.
         """
@@ -382,7 +357,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'score' (-101), out of range -100 to 100" in err.args[0]
 
-    def test_10d_neg_validate_score_too_high(self):
+    def test_08d_neg_validate_score_too_high(self):
         """
         Verify that we detect scores too high.
         """
@@ -395,7 +370,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'score' (101), out of range 0 to 100" in err.args[0]
 
-    def test_10d_neg_validate_score_too_high_neg_allowed(self):
+    def test_08d_neg_validate_score_too_high_neg_allowed(self):
         """
         Verify that we detect scores too high.
         """
@@ -408,7 +383,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'score' (101), out of range -100 to 100" in err.args[0]
 
-    def test_11a_validate_id_all_allowed_chars(self):
+    def test_09a_validate_id_all_allowed_chars(self):
         """
         Validate all allowed characters for id..
         """
@@ -416,7 +391,7 @@ class TestCbReportMethods(TestCommon):
         info['reports'][0]['id'] = "abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-01234.56789"
         CbReport(**info['reports'][0])
 
-    def test_11b_neg_validate_id_disallowed_spaces(self):
+    def test_09b_neg_validate_id_disallowed_spaces(self):
         """
         Verify that we detect scores too high.
         """
@@ -429,7 +404,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'cant have spaces' (the id) is invalid and may only contain" in err.args[0]
 
-    def test_11c_neg_validate_id_disallowed_special(self):
+    def test_09c_neg_validate_id_disallowed_special(self):
         """
         Verify that we detect scores too high.
         """
@@ -442,7 +417,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'no$special' (the id) is invalid and may only contain" in err.args[0]
 
-    def test_12a_neg_validate_iocs_bad_format(self):
+    def test_10a_neg_validate_iocs_bad_format(self):
         """
         Verify that we detect an iocs section with an incorrect format (attempted list of dict).
         """
@@ -455,7 +430,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'iocs', has bad format (must be dict)" in err.args[0]
 
-    def test_12b_neg_validate_iocs_empty(self):
+    def test_10b_neg_validate_iocs_empty(self):
         """
         Verify that we detect an iocs section with no entries.
         """
@@ -468,7 +443,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'iocs', has no entries" in err.args[0]
 
-    def test_12c_neg_validate_iocs_entry_not_list(self):
+    def test_10c_neg_validate_iocs_entry_not_list(self):
         """
         Verify that we detect an iocs entry that is not a list of string (supposed bad formatting).
         """
@@ -481,7 +456,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'iocs', ioc 'md5', is not a list of str" in err.args[0]
 
-    def test_12d_neg_validate_iocs_entry_empty_list(self):
+    def test_10d_neg_validate_iocs_entry_empty_list(self):
         """
         Verify that we detect an iocs entry that is empty.
         """
@@ -494,7 +469,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'iocs', ioc 'md5', must have at least 1 entry" in err.args[0]
 
-    def test_12e_neg_validate_iocs_entry_contains_non_str(self):
+    def test_10e_neg_validate_iocs_entry_contains_non_str(self):
         """
         Verify that we detect an iocs entry that has a non-string entry.
         """
@@ -507,57 +482,40 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithMd5', field 'iocs', ioc 'md5', has non-str entry" in err.args[0]
 
-    def test_12f_validate_iocs_entry_unknown_type(self):
+    def test_10f_neg_validate_iocs_entry_unknown_type(self):
         """
         Verify that if not pedantic, unknown types are left alone.
         """
         info, _ = self._load_feed_file()
         info['reports'][0]['iocs']['foobar'] = ["43.5.66.90"]
-        CbReport(**info['reports'][0])
-
-    def test_12g_neg_validate_iocs_entry_unknown_type_pedantic(self):
-        """
-        Verify that we detect an unknown ioc type if validating with pedantic.
-        """
-        info, _ = self._load_feed_file()
-        del info['reports'][0]['description']
-        del info['reports'][0]['tags']
-        info['reports'][0]['iocs']['foobar'] = ["43.5.66.90"]
-        cr = CbReport(**info['reports'][0])
-
         try:
-            cr.validate(pedantic=True)
+            CbReport(**info['reports'][0])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithMd5', field 'iocs', contains unknown types: ['foobar']" in err.args[0]
+            assert "Report 'WithMd5', field 'iocs', unknown ioc 'foobar'" in err.args[0]
 
-    def test_13a_neg_validate_query_ioc_not_dict(self):
-        """
-        Verify that event_query iocs have the proper format.
-        """
-        info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query'] = ["process_name:foobar.exe"]
-
-        try:
-            CbReport(**info['reports'][2])
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithQueryEvent', field 'iocs', ioc 'event_query', is not a dictionary" in err.args[0]
-
-    def test_13b_neg_validate_query_ioc_extra_keys(self):
+    def test_10g_validate_query_ioc_extra_keys(self):
         """
         Verify that event_query iocs don't have extra keys.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['foobar'] = ["process_name:foobar.exe"]
+        info['reports'][2]['iocs']['event_query']['foobar'] = ["process_name:foobar.exe"]
+        cr = CbReport(**info['reports'][2])
+        assert 'foobar' not in cr.data['iocs']['event_query']
 
+    def test_10h_neg_validate_query_ioc_extra_keys_strict(self):
+        """
+        Verify that event_query iocs don't have extra keys.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][2]['iocs']['event_query']['foobar'] = ["process_name:foobar.exe"]
         try:
-            CbReport(**info['reports'][2])
+            cr = CbReport(strict=True, **info['reports'][2])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithQueryEvent', field 'iocs', has extra keys: ['foobar']" in err.args[0]
+            assert "Report 'WithQueryEvent', field 'ioc' query includes unknown field: foobar" in err.args[0]
 
-    def test_13c_neg_validate_query_ioc_missing_index_type(self):
+    def test_11a_neg_validate_query_ioc_missing_index_type(self):
         """
         Verify that event_query iocs have the index_type section.
         """
@@ -570,7 +528,20 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithQueryEvent', field 'iocs', 'event_query' section missing 'index_type'" in err.args[0]
 
-    def test_13d_neg_validate_query_ioc_index_type_empty(self):
+    def test_11b_neg_validate_query_ioc_not_dict(self):
+        """
+        Verify that event_query iocs have the proper format.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][2]['iocs']['event_query'] = ["process_name:foobar.exe"]
+
+        try:
+            CbReport(**info['reports'][2])
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report 'WithQueryEvent', field 'iocs', ioc 'event_query', is not a dictionary" in err.args[0]
+
+    def test_11c_neg_validate_query_ioc_index_type_empty(self):
         """
         Verify that event_query iocs have the index_type section, and that empty values are detected.
         """
@@ -583,7 +554,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithQueryEvent', field 'iocs', 'index_type' is not a known type ()" in err.args[0]
 
-    def test_13e_neg_validate_query_ioc_index_type_invalid(self):
+    def test_11d_neg_validate_query_ioc_index_type_invalid(self):
         """
         Verify that event_query iocs have the index_type section, and that empty values are detected.
         """
@@ -596,7 +567,7 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithQueryEvent', field 'iocs', 'index_type' is not a known type (foobar)" in err.args[0]
 
-    def test_13f_neg_validate_query_ioc_missing_search_query(self):
+    def test_11e_neg_validate_query_ioc_missing_search_query(self):
         """
         Verify that event_query iocs have the search_query section.
         """
@@ -609,21 +580,21 @@ class TestCbReportMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithQueryEvent', field 'iocs', 'event_query' section missing 'search_query'" in err.args[0]
 
-    def test_13g_validate_query_ioc_good_event_query(self):
+    def test_12a_validate_query_ioc_good_event_query(self):
         """
         Verify that event_query iocs have the search_query section.
         """
         info, _ = self._load_feed_file()
         CbReport(**info['reports'][2])
 
-    def test_13h_validate_query_ioc_good_module_query(self):
+    def test_12b_validate_query_ioc_good_module_query(self):
         """
         Verify that event_query iocs have the search_query section.
         """
         info, _ = self._load_feed_file()
         CbReport(**info['reports'][3])
 
-    def test_13i_neg_validate_query_ioc_search_query_invald_chars(self):
+    def test_13a_neg_validate_query_ioc_search_query_invald_chars(self):
         """
         Verify that event_query iocs have valid characters in the query.
         """
@@ -980,30 +951,14 @@ class TestCbReportMethods(TestCommon):
 
     def test_20e_validate_dns_ioc_octet_starts_with_number(self):
         """
-        Verify that dns entries with octets starting with a number are allowed when not pedantic (as seen in
-        example test feeds).
+        Verify that dns entries with octets starting with a number are allowed (not fully to spec, but seems to
+        be seen in external source data)
         """
         info, _ = self._load_feed_file()
         info['reports'][6]['iocs']['dns'][0] = "foobar.4chan.com"
         CbReport(**info['reports'][6])
 
-    def test_20f_neg_validate_dns_ioc_octet_starts_with_number_pedantic(self):
-        """
-        Verify that dns entries with octets starting with a number are detected.
-        """
-        info, _ = self._load_feed_file()
-        del info['reports'][6]['description']
-        del info['reports'][6]['tags']
-        info['reports'][6]['iocs']['dns'][0] = "foobar.4chan.com"
-        cr = CbReport(**info['reports'][6])
-
-        try:
-            cr.validate(pedantic=True)
-            self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithDns', field 'iocs', 'dns' is invalid : foobar.4chan.com" in err.args[0]
-
-    def test_20g_neg_validate_dns_ioc_octet_starts_with_hyphen(self):
+    def test_20f_neg_validate_dns_ioc_octet_starts_with_hyphen(self):
         """
         Verify that dns entries with octets starting with a number are detected.
         """

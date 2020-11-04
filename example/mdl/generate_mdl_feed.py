@@ -26,8 +26,8 @@ from cbfeeds import CbReport
 from cbfeeds import CbFeed
 from cbfeeds import CbFeedInfo
 
-# NOTE: as of 10/03/2020, the feed only returns data in the year of 2009. Adding functionality for ALL data
-DAYS_BACK: Optional[int] = None  # use number for days back from today, None for all data
+# NOTE: as of 10/03/2020, the feed only returns data in the year 2009; adding functionality for ALL data
+DAYS_BACK: Optional[int] = 90  # use number for days back from today, None for all data
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +125,7 @@ def create(local_csv_file: str = None) -> str:
                 'category': "Open Source"
                 }
 
+    logger.info(f">> Feed `{feedinfo['display_name']}` generated with {len(reports)} reports")
     feedinfo = CbFeedInfo(**feedinfo)
     the_feed = CbFeed(feedinfo, reports)
     feed_json = the_feed.dump()

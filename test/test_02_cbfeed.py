@@ -23,18 +23,7 @@ class TestCbFeedMethods(TestCommon):
         _, feed = self._load_feed_file()
         feed.validate()
 
-    def test_02_validate_feed_pedantic(self):
-        """
-        Verify that overall feed validation works, but tags other than required one will be flagged in reports!
-        """
-        _, feed = self._load_feed_file()
-        try:
-            feed.validate(pedantic=True)
-            self.fail("Did not get expected exception!")
-        except cbfeeds.CbInvalidReport:
-            pass
-
-    def test_03_validate_feed_serialized(self):
+    def test_02_validate_feed_serialized(self):
         """
         Verify that overall feed validation works with serialized data.
         """
@@ -43,7 +32,7 @@ class TestCbFeedMethods(TestCommon):
 
     # ----- Method validation  ----------------------------------------- #
 
-    def test_10_neg_validate_feedinfo_missing(self):
+    def test_03a_neg_validate_feedinfo_missing(self):
         """
         Verify that CBFeed.validate detects missing feedinfo.
         """
@@ -55,7 +44,7 @@ class TestCbFeedMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidFeed as err:
             assert "Feed missing 'feedinfo' data" in err.args[0]
 
-    def test_11_neg_validate_feedinfo_missing_serialized(self):
+    def test_03b_neg_validate_feedinfo_missing_serialized(self):
         """
         Verify that CBFeed.validate detects missing feedinfo in serialized mode.
         """
@@ -67,7 +56,7 @@ class TestCbFeedMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidFeed as err:
             assert "Feed missing 'feedinfo' data" in err.args[0]
 
-    def test_12_neg_validate_reports_missing(self):
+    def test_04a_neg_validate_reports_missing(self):
         """
         Verify that CBFeed.validate detects missing reports.
         """
@@ -79,7 +68,7 @@ class TestCbFeedMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidFeed as err:
             assert "Feed missing 'reports' structure" in err.args[0]
 
-    def test_13_neg_validate_reports_missing_serialized(self):
+    def test_04b_neg_validate_reports_missing_serialized(self):
         """
         Verify that CBFeed.validate detects missing reports in serialized mode.
         """
@@ -91,7 +80,34 @@ class TestCbFeedMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidFeed as err:
             assert "Feed missing 'reports' structure" in err.args[0]
 
-    def test_14_neg_validate_reports_list_dup_id(self):
+    def test_05a_neg_validate_feed_strict_bad_feedinfo(self):
+        """
+        Verify that CBFeed.validate detects non-CB feedinfo fields if strict.
+        """
+        info, _ = self._load_feed_file()
+        info['feedinfo']['booga'] = "foobar"
+        try:
+            feed = cbfeeds.CbFeed(info['feedinfo'], info['reports'], strict=True)
+            feed.validate()
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidFeed as err:
+            assert "Problem with feed `QA Feed BWF912316192`: Feedinfo includes unknown field: booga" in err.args[0]
+
+    def test_05b_neg_validate_feed_strict_bad_report(self):
+        """
+        Verify that CBFeed.validate detects non-CB feedinfo fields if strict.
+        """
+        info, _ = self._load_feed_file()
+        info['reports'][1]['booga'] = "foobar"
+        try:
+            feed = cbfeeds.CbFeed(info['feedinfo'], info['reports'], strict=True)
+            feed.validate()
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert ("Problem with feed `QA Feed BWF912316192`, report `WithSha256`: Report includes "
+                    f"unknown field: booga") in err.args[0]
+
+    def test_06_neg_validate_reports_list_dup_id(self):
         """
         Verify that validate_report_list detects duplicate ids.
         """
@@ -105,7 +121,7 @@ class TestCbFeedMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidFeed as err:
             assert "Duplicate report id 'WithSha256" in err.args[0]
 
-    def test_15_validate_iter_iocs(self):
+    def test_07_validate_iter_iocs(self):
         """
         Verify that iter_iocs returns all iocs properly.
         """
@@ -128,7 +144,7 @@ class TestCbFeedMethods(TestCommon):
             else:
                 extras.append(key)
 
-    def test_16_validate_dump(self):
+    def test_07_validate_dump(self):
         """
         Verify that dump() works as expected.
         """

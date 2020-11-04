@@ -104,6 +104,8 @@ def create() -> str:
                 'category': 'Open Source',
                 }
 
+    logger.info(f">> Feed `{feedinfo['display_name']}` generated with {len(reports)} reports")
+
     feedinfo = CbFeedInfo(**feedinfo)
     feed = CbFeed(feedinfo, reports)
     created_feed = feed.dump()
