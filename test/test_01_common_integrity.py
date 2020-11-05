@@ -46,7 +46,7 @@ class TestCommonIntegrity(TestCommon):
             feed = self._save_test_feed(info)
             feed.validate()
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo missing required field(s)" in err.args[0]
 
     def test_04_neg_reports_missing(self):

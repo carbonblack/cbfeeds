@@ -13,7 +13,7 @@ import tempfile
 import time
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
-from cbfeeds import CbIconError, CbInvalidFeed, CbInvalidReport
+from cbfeeds import CbIconError, CbInvalidFeed, CbInvalidFeedInfo, CbInvalidReport
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class CbFeedInfo(object):
         for key in self._data.keys():
             if key not in self.required and key not in self.optional:
                 if self.strict:
-                    raise CbInvalidFeed(f"Feedinfo includes unknown field: {key}")
+                    raise CbInvalidFeedInfo(f"Feedinfo includes unknown field: {key}")
                 else:
                     pruner.append(key)
         for item in pruner:
@@ -145,7 +145,7 @@ class CbFeedInfo(object):
         # verify that all required fields are there
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
-            raise CbInvalidFeed("FeedInfo missing required field(s): %s" % missing_fields)
+            raise CbInvalidFeedInfo("FeedInfo missing required field(s): %s" % missing_fields)
 
         # check to see if icon_field is a string or bytes base64 decoded
         for icon_field in ["icon", "icon_small"]:
@@ -170,20 +170,22 @@ class CbFeedInfo(object):
         for key in self.data.keys():
             if key in self.is_numeric:
                 if not isinstance(self.data[key], (int, float)):
-                    raise CbInvalidFeed(f"FeedInfo field `{key}` must be int or float, not type {type(self.data[key])}")
+                    raise CbInvalidFeedInfo(
+                        f"FeedInfo field `{key}` must be int or float, not type {type(self.data[key])}")
             else:
                 if not isinstance(self.data[key], (str, bytes)):
-                    raise CbInvalidFeed(f"FeedInfo field `{key}` must be str or bytes, not type {type(self.data[key])}")
+                    raise CbInvalidFeedInfo(
+                        f"FeedInfo field `{key}` must be str or bytes, not type {type(self.data[key])}")
 
         # certain fields, when present, must not be empty strings
         for key in self.data.keys():
             if key in self.noemptystrings and self.data[key] == "":
-                raise CbInvalidFeed(f"The '{key}' field must not be an empty string")
+                raise CbInvalidFeedInfo(f"The '{key}' field must not be an empty string")
 
         # validate shortname of this field is just a-z and 0-9, with at least one character
         if not self.data["name"].isalnum():
-            raise CbInvalidFeed(f"Feed name `{self.data['name']}` may only contain a-z, A-Z, "
-                                "0-9 and must have one character")
+            raise CbInvalidFeedInfo(f"Feed name `{self.data['name']}` may only contain a-z, A-Z, "
+                                    "0-9 and must have one character")
 
 
 class CbReport(object):
@@ -244,14 +246,14 @@ class CbReport(object):
         return repr(self.data)
 
     @property
-    def data(self) -> Dict[str, Union[str, int, float, Dict]]:
+    def data(self) -> Dict[str, Union[str, int, Dict, List]]:
         """
         :return: the internally stored value
         """
         return self._data
 
     @data.setter
-    def data(self, new_data: Dict[str, Union[str, int, float, Dict]]) -> None:
+    def data(self, new_data: Dict[str, Union[str, int, Dict, List]]) -> None:
         """
         Update the internal data, ignoring unknown keys.
 
@@ -522,14 +524,13 @@ class CbFeed(object):
     Class to hold feed information.
     """
 
-    def __init__(self, feedinfo: Union[CbFeedInfo, Dict[str, Any]], reports: List[Union[CbReport, Dict[str, Any]]],
-                 strict: bool = False):
+    def __init__(self, feedinfo: Union[CbFeedInfo, Dict[str, Union[str, int, float]]],
+                 reports: List[Union[CbReport, Dict[str, Union[str, int, Dict, List]]]]):
         """
         Initialize the class.
 
         :param feedinfo: feedinfo portion of a feed, as dict or CbFeedInfo object
         :param reports: reports portion of a feed, as list of dict or list of CbReport objects
-        :param strict: If True, raise exceptions on non-CB fields, otherwise ignore them
         """
         # basic sanity check!
         if not isinstance(feedinfo, (Dict, CbFeedInfo)):
@@ -551,8 +552,6 @@ class CbFeed(object):
         self.data = {'feedinfo': use_feed,
                      'reports': use_rep}
 
-        self.strict = strict
-
     def __repr__(self):
         """Return the canonical string representation of the object."""
         return repr(self.data)
@@ -563,11 +562,12 @@ class CbFeed(object):
 
     # --------------------------------------------------
 
-    def validate(self, serialized_data: str = None) -> None:
+    def validate(self, serialized_data: str = None, strict: bool = False) -> None:
         """
         Validates the feed information.
 
         :param serialized_data: serialized data for the feed (JSON string)
+        :param strict: If True, throw exception for non-CB fields, otherwise just prune them
         """
         if not serialized_data:
             # this should be identity, but just to be safe.
@@ -576,23 +576,23 @@ class CbFeed(object):
         data = json.loads(serialized_data)
 
         if "feedinfo" not in data:
-            raise CbInvalidFeed("Feed missing 'feedinfo' data")
+            raise CbInvalidFeedInfo("Feed missing 'feedinfo' data")
 
         if 'reports' not in data:
-            raise CbInvalidFeed("Feed missing 'reports' structure")
+            raise CbInvalidFeedInfo("Feed missing 'reports' structure")
 
         dispname = data['feedinfo'].get('display_name', "???")
 
         # validate the feed info
         try:
-            CbFeedInfo(strict=self.strict, validate=True, **data["feedinfo"])
+            CbFeedInfo(strict=strict, validate=True, **data["feedinfo"])
         except Exception as err:
-            raise CbInvalidFeed(f"Problem with feed `{dispname}`: {err}")
+            raise CbInvalidFeedInfo(f"Problem with feed `{dispname}`: {err}")
 
         # validate each report individually
         for rep in data["reports"]:
             try:
-                CbReport(strict=self.strict, validate=True, **rep)
+                CbReport(strict=strict, validate=True, **rep)
             except Exception as err:
                 raise CbInvalidReport(f"Problem with feed `{dispname}`, report `{rep['id']}`: {err}")
 
@@ -649,5 +649,5 @@ class CbFeed(object):
         # Verify that no two reports have the same feed id -- see CBAPI-17
         for report in reports:
             if report['id'] in reportids:
-                raise CbInvalidFeed(f"Duplicate report id '{report['id']}'")
+                raise CbInvalidFeedInfo(f"Duplicate report id '{report['id']}'")
             reportids.add(report['id'])

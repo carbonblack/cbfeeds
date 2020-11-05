@@ -36,7 +36,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(strict=True, **info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feedinfo includes unknown field: foobar" in err.args[0]
 
     def test_00c_validate_unknown_key_unstrict(self):
@@ -60,7 +60,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             cfi.validate(strict=True)
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feedinfo includes unknown field: foobar" in err.args[0]
             assert cfi.strict
 
@@ -84,7 +84,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             cfi.data = info['feedinfo']
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feedinfo includes unknown field: foobar" in err.args[0]
 
     # ----- Icon checks when data is initialized/updated ------------------------------
@@ -179,7 +179,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo missing required field(s): display_name" in err.args[0]
 
     def test_03b_neg_validate_name_missing(self):
@@ -191,7 +191,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo missing required field(s): name" in err.args[0]
 
     def test_03c_neg_validate_provider_url_missing(self):
@@ -203,7 +203,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo missing required field(s): provider_url" in err.args[0]
 
     def test_03d_neg_validate_summary_missing(self):
@@ -215,7 +215,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo missing required field(s): summary" in err.args[0]
 
     def test_03e_neg_validate_tech_data_missing(self):
@@ -227,7 +227,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo missing required field(s): tech_data" in err.args[0]
 
     def test_04a_validate_optional_category_missing(self):
@@ -312,7 +312,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `provider_rating` must be int or float" in err.args[0]
 
     def test_06b_neg_validate_version_not_numeric(self):
@@ -324,7 +324,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `version` must be int or float" in err.args[0]
 
     def test_07a_neg_validate_category_not_str_or_bytes(self):
@@ -336,7 +336,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `category` must be str or bytes" in err.args[0]
 
     def test_07b_neg_validate_display_name_not_str_or_bytes(self):
@@ -348,7 +348,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `display_name` must be str or bytes" in err.args[0]
 
     def test_07c_neg_validate_name_not_str_or_bytes(self):
@@ -360,7 +360,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `name` must be str or bytes" in err.args[0]
 
     def test_07d_neg_validate_provider_url_not_str_or_bytes(self):
@@ -372,7 +372,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `provider_url` must be str or bytes" in err.args[0]
 
     def test_07e_neg_validate_summary_not_str_or_bytes(self):
@@ -384,7 +384,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `summary` must be str or bytes" in err.args[0]
 
     def test_07f_neg_validate_tech_data_not_str_or_bytes(self):
@@ -396,7 +396,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "FeedInfo field `tech_data` must be str or bytes" in err.args[0]
 
     def test_08a_neg_validate_category_empty_string(self):
@@ -408,7 +408,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "The 'category' field must not be an empty string" in err.args[0]
 
     def test_08b_neg_validate_display_name_empty_string(self):
@@ -420,7 +420,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "The 'display_name' field must not be an empty string" in err.args[0]
 
     def test_08c_neg_validate_name_empty_string(self):
@@ -432,7 +432,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "The 'name' field must not be an empty string" in err.args[0]
 
     def test_08d_neg_validate_summary_empty_string(self):
@@ -444,7 +444,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "The 'summary' field must not be an empty string" in err.args[0]
 
     def test_08e_neg_validate_tech_data_empty_string(self):
@@ -456,7 +456,7 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "The 'tech_data' field must not be an empty string" in err.args[0]
 
     def test_09_neg_validate_name_alphanumeric(self):
@@ -468,5 +468,5 @@ class TestCbFeedInfoMethods(TestCommon):
         try:
             CbFeedInfo(**info['feedinfo'])
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feed name `invalid_name` may only contain a-z, A-Z, 0-9 and must have one character" in err.args[0]

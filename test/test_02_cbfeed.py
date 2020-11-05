@@ -41,7 +41,7 @@ class TestCbFeedMethods(TestCommon):
         try:
             feed.validate()
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feed missing 'feedinfo' data" in err.args[0]
 
     def test_03b_neg_validate_feedinfo_missing_serialized(self):
@@ -53,7 +53,7 @@ class TestCbFeedMethods(TestCommon):
         try:
             feed.validate(serialized_data=json.dumps(info))
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feed missing 'feedinfo' data" in err.args[0]
 
     def test_04a_neg_validate_reports_missing(self):
@@ -65,7 +65,7 @@ class TestCbFeedMethods(TestCommon):
         try:
             feed.validate()
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feed missing 'reports' structure" in err.args[0]
 
     def test_04b_neg_validate_reports_missing_serialized(self):
@@ -77,7 +77,7 @@ class TestCbFeedMethods(TestCommon):
         try:
             feed.validate(serialized_data=json.dumps(info))
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Feed missing 'reports' structure" in err.args[0]
 
     def test_05a_neg_validate_feed_strict_bad_feedinfo(self):
@@ -87,10 +87,10 @@ class TestCbFeedMethods(TestCommon):
         info, _ = self._load_feed_file()
         info['feedinfo']['booga'] = "foobar"
         try:
-            feed = cbfeeds.CbFeed(info['feedinfo'], info['reports'], strict=True)
-            feed.validate()
+            feed = cbfeeds.CbFeed(info['feedinfo'], info['reports'])
+            feed.validate(strict=True)
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Problem with feed `QA Feed BWF912316192`: Feedinfo includes unknown field: booga" in err.args[0]
 
     def test_05b_neg_validate_feed_strict_bad_report(self):
@@ -100,8 +100,8 @@ class TestCbFeedMethods(TestCommon):
         info, _ = self._load_feed_file()
         info['reports'][1]['booga'] = "foobar"
         try:
-            feed = cbfeeds.CbFeed(info['feedinfo'], info['reports'], strict=True)
-            feed.validate()
+            feed = cbfeeds.CbFeed(info['feedinfo'], info['reports'])
+            feed.validate(strict=True)
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert ("Problem with feed `QA Feed BWF912316192`, report `WithSha256`: Report includes "
@@ -118,7 +118,7 @@ class TestCbFeedMethods(TestCommon):
         try:
             feed.validate_report_list(reports)
             self.fail("Did not get expected exception!")
-        except cbfeeds.exceptions.CbInvalidFeed as err:
+        except cbfeeds.exceptions.CbInvalidFeedInfo as err:
             assert "Duplicate report id 'WithSha256" in err.args[0]
 
     def test_07_validate_iter_iocs(self):
