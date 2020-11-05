@@ -7,7 +7,7 @@ CHANGELOG.md
  * Added handling of sha256, ja3, ja3s and query reports
  * Added unit tests
 
-> _NOTE: Examples not converted at this time!_
+> _NOTE: Not all examples not converted at this time!_
 
 ## v0.8.0
 #### Features

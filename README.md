@@ -46,6 +46,8 @@ easy to add support for feed data from any input source.
 
 Example feed creation scripts are included.  See the 'Examples' section in this document for a listing of the examples.
 
+> _**NOTE:** As of this version, python 3 is a requirement._
+
 ## Using the Carbon Black Feeds API
 
 The Carbon Black Feeds API (CBFAPI) is found on github at:
