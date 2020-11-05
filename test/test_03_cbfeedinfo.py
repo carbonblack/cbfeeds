@@ -39,6 +39,31 @@ class TestCbFeedInfoMethods(TestCommon):
         except cbfeeds.exceptions.CbInvalidFeed as err:
             assert "Feedinfo includes unknown field: foobar" in err.args[0]
 
+    def test_00c_validate_unknown_key_unstrict(self):
+        """
+        Verify that validate with strict=False will turn off strictness in addition to validation.
+        """
+        info, _ = self._load_feed_file()
+        cfi = CbFeedInfo(strict=True, **info['feedinfo'])
+        cfi._data['foobar'] = "should vanish"
+        cfi.validate(strict=False)
+        assert "foobar" not in cfi.data
+        assert not cfi.strict
+
+    def test_00d_validate_unknown_key_strict(self):
+        """
+        Verify that validate with strict=True will turn on strictness in addition to validation.
+        """
+        info, _ = self._load_feed_file()
+        cfi = CbFeedInfo(**info['feedinfo'])
+        cfi._data['foobar'] = "should vanish"
+        try:
+            cfi.validate(strict=True)
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidFeed as err:
+            assert "Feedinfo includes unknown field: foobar" in err.args[0]
+            assert cfi.strict
+
     def test_01a_update_unknown_key(self):
         """
         Verify that updated feedinfo data only retains known keys.

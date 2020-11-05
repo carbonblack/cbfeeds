@@ -4,7 +4,7 @@ CHANGELOG.md
 ## v1.0.0
 #### Features
  * Converted to python3
- * Added handling of sha256, ja3, ja3s and event_query reports
+ * Added handling of sha256, ja3, ja3s and query reports
  * Added unit tests
 
 > _NOTE: Examples not converted at this time!_

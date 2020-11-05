@@ -19,8 +19,8 @@ class TestCbReportMethods(TestCommon):
         """
         info, _ = self._load_feed_file()
         info['reports'][0]['foobar'] = "should vanish"
-        cfi = CbReport(**info['reports'][0])
-        assert "foobar" not in cfi.data
+        cr = CbReport(**info['reports'][0])
+        assert "foobar" not in cr.data
 
     def test_00b_neg_init_unknown_key_strict(self):
         """
@@ -33,6 +33,31 @@ class TestCbReportMethods(TestCommon):
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report includes unknown field: foobar" in err.args[0]
+
+    def test_00c_validate_unknown_key_unstrict(self):
+        """
+        Verify that validate with strict=False will turn off strictness in addition to validation.
+        """
+        info, _ = self._load_feed_file()
+        cr = CbReport(strict=True, **info['reports'][0])
+        cr._data['foobar'] = "should vanish"
+        cr.validate(strict=False)
+        assert "foobar" not in cr.data
+        assert not cr.strict
+
+    def test_00d_neg_validate_unknown_key_strict(self):
+        """
+        Verify that an initialized feedinfo object only retains known keys.
+        """
+        info, _ = self._load_feed_file()
+        cr = CbReport(**info['reports'][0])
+        cr._data['foobar'] = "should vanish"
+        try:
+            cr.validate(strict=True)
+            self.fail("Did not get expected exception!")
+        except cbfeeds.exceptions.CbInvalidReport as err:
+            assert "Report includes unknown field: foobar" in err.args[0]
+            assert cr.strict
 
     def test_01a_update_unknown_key(self):
         """
@@ -496,57 +521,57 @@ class TestCbReportMethods(TestCommon):
 
     def test_10g_validate_query_ioc_extra_keys(self):
         """
-        Verify that event_query iocs don't have extra keys.
+        Verify that query iocs don't have extra keys.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query']['foobar'] = ["process_name:foobar.exe"]
+        info['reports'][2]['iocs']['query']['foobar'] = ["process_name:foobar.exe"]
         cr = CbReport(**info['reports'][2])
-        assert 'foobar' not in cr.data['iocs']['event_query']
+        assert 'foobar' not in cr.data['iocs']['query']
 
     def test_10h_neg_validate_query_ioc_extra_keys_strict(self):
         """
-        Verify that event_query iocs don't have extra keys.
+        Verify that query iocs don't have extra keys.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query']['foobar'] = ["process_name:foobar.exe"]
+        info['reports'][2]['iocs']['query']['foobar'] = ["process_name:foobar.exe"]
         try:
-            cr = CbReport(strict=True, **info['reports'][2])
+            CbReport(strict=True, **info['reports'][2])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
             assert "Report 'WithQueryEvent', field 'ioc' query includes unknown field: foobar" in err.args[0]
 
     def test_11a_neg_validate_query_ioc_missing_index_type(self):
         """
-        Verify that event_query iocs have the index_type section.
+        Verify that query iocs have the index_type section.
         """
         info, _ = self._load_feed_file()
-        del info['reports'][2]['iocs']['event_query']['index_type']
+        del info['reports'][2]['iocs']['query']['index_type']
 
         try:
             CbReport(**info['reports'][2])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithQueryEvent', field 'iocs', 'event_query' section missing 'index_type'" in err.args[0]
+            assert "Report 'WithQueryEvent', field 'iocs', 'query' section missing 'index_type'" in err.args[0]
 
     def test_11b_neg_validate_query_ioc_not_dict(self):
         """
-        Verify that event_query iocs have the proper format.
+        Verify that query iocs have the proper format.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query'] = ["process_name:foobar.exe"]
+        info['reports'][2]['iocs']['query'] = ["process_name:foobar.exe"]
 
         try:
             CbReport(**info['reports'][2])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithQueryEvent', field 'iocs', ioc 'event_query', is not a dictionary" in err.args[0]
+            assert "Report 'WithQueryEvent', field 'iocs', ioc 'query', is not a dictionary" in err.args[0]
 
     def test_11c_neg_validate_query_ioc_index_type_empty(self):
         """
-        Verify that event_query iocs have the index_type section, and that empty values are detected.
+        Verify that query iocs have the index_type section, and that empty values are detected.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query']['index_type'] = ""
+        info['reports'][2]['iocs']['query']['index_type'] = ""
 
         try:
             CbReport(**info['reports'][2])
@@ -556,10 +581,10 @@ class TestCbReportMethods(TestCommon):
 
     def test_11d_neg_validate_query_ioc_index_type_invalid(self):
         """
-        Verify that event_query iocs have the index_type section, and that empty values are detected.
+        Verify that query iocs have the index_type section, and that empty values are detected.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query']['index_type'] = "foobar"
+        info['reports'][2]['iocs']['query']['index_type'] = "foobar"
 
         try:
             CbReport(**info['reports'][2])
@@ -569,43 +594,43 @@ class TestCbReportMethods(TestCommon):
 
     def test_11e_neg_validate_query_ioc_missing_search_query(self):
         """
-        Verify that event_query iocs have the search_query section.
+        Verify that query iocs have the search_query section.
         """
         info, _ = self._load_feed_file()
-        del info['reports'][2]['iocs']['event_query']['search_query']
+        del info['reports'][2]['iocs']['query']['search_query']
 
         try:
             CbReport(**info['reports'][2])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert "Report 'WithQueryEvent', field 'iocs', 'event_query' section missing 'search_query'" in err.args[0]
+            assert "Report 'WithQueryEvent', field 'iocs', 'query' section missing 'search_query'" in err.args[0]
 
-    def test_12a_validate_query_ioc_good_event_query(self):
+    def test_12a_validate_query_ioc_good_query(self):
         """
-        Verify that event_query iocs have the search_query section.
+        Verify that query iocs have the search_query section.
         """
         info, _ = self._load_feed_file()
         CbReport(**info['reports'][2])
 
     def test_12b_validate_query_ioc_good_module_query(self):
         """
-        Verify that event_query iocs have the search_query section.
+        Verify that query iocs have the search_query section.
         """
         info, _ = self._load_feed_file()
         CbReport(**info['reports'][3])
 
     def test_13a_neg_validate_query_ioc_search_query_invald_chars(self):
         """
-        Verify that event_query iocs have valid characters in the query.
+        Verify that query iocs have valid characters in the query.
         """
         info, _ = self._load_feed_file()
-        info['reports'][2]['iocs']['event_query']['search_query'][0] = 'cb.urlver=1&q=process_name:notepad.exe'
+        info['reports'][2]['iocs']['query']['search_query'][0] = 'cb.urlver=1&q=process_name:notepad.exe'
 
         try:
             CbReport(**info['reports'][2])
             self.fail("Did not get expected exception!")
         except cbfeeds.exceptions.CbInvalidReport as err:
-            assert ("Report 'WithQueryEvent', field 'iocs', 'event_query' has unescaped non-reserved character ':' "
+            assert ("Report 'WithQueryEvent', field 'iocs', 'query' has unescaped non-reserved character ':' "
                     "found in query; use percent-encoding") in err.args[0]
 
     def test_14a_neg_validate_md5_ioc_too_short(self):

@@ -52,7 +52,7 @@
       "description": "Query ['process_name:notepad.exe'] ",
       "id": "WithQueryEvent",
       "iocs": {
-        "event_query": {
+        "query": {
           "index_type": "events",
           "search_query": [
             "cb.urlver=1&q=process_name%3Anotepad.exe"
@@ -73,7 +73,7 @@
       "description": "Query ['observed_filename:notepad.exe'] ",
       "id": "WithQueryModule",
       "iocs": {
-        "event_query": {
+        "query": {
           "index_type": "modules",
           "search_query": [
             "cb.urlver=1&cb.q.observed_filename=notepad.exe"

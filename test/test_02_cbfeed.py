@@ -134,7 +134,7 @@ class TestCbFeedMethods(TestCommon):
                     'dns|spend.policy.issue.net': True,
                     'ja3|07f362079e7f3d5a8855549fcc9a441e': True,
                     'ja3s|0fa6b3b35df905b209742cf80c06f7da': True,
-                    'event_query|process_name:foobar.exe': True,
+                    'query|process_name:foobar.exe': True,
                     }
         extras = []
         for item in feed.iter_iocs():

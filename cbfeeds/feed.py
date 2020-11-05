@@ -6,6 +6,7 @@ import base64
 import imghdr
 import ipaddress
 import json
+import logging
 import os
 import re
 import tempfile
@@ -13,6 +14,8 @@ import time
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 from cbfeeds import CbIconError, CbInvalidFeed, CbInvalidReport
+
+logger = logging.getLogger(__name__)
 
 
 class CbFeedInfo(object):
@@ -71,11 +74,18 @@ class CbFeedInfo(object):
 
         :param new_data: new structure to update data with
         """
-        for key, value in new_data.items():
-            if key in self.required or key in self.optional:
-                self._data[key] = value
-            elif self.strict:
-                raise CbInvalidFeed(f"Feedinfo includes unknown field: {key}")
+        self._data = new_data
+
+        pruner = []
+        for key in self._data.keys():
+            if key not in self.required and key not in self.optional:
+                if self.strict:
+                    raise CbInvalidFeed(f"Feedinfo includes unknown field: {key}")
+                else:
+                    pruner.append(key)
+        for item in pruner:
+            del self._data[item]
+            logger.debug(f"Pruned unknown field `{item}` from feedinfo")
 
         def is_base64(data: str, strict: bool = False) -> Tuple[bool, Optional[str]]:
             try:
@@ -117,12 +127,21 @@ class CbFeedInfo(object):
 
     # --------------------------------------------------
 
-    def validate(self) -> None:
+    def validate(self, strict: bool = None) -> None:
         """
         Perform a set of checks to validate data before we export the feed.
 
+        :param strict: If True or False, changes srict setting of class; True raises exception on non-CB fields, False
+                       prunes them
         :raises: CbInvalidFeed if there are validation problems
         """
+        if strict is not None:
+            if isinstance(strict, bool):
+                self.strict = strict
+            else:
+                raise TypeError("`strict` parameter must be a boolean")
+        self.data = self._data  # re-asess
+
         # verify that all required fields are there
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
@@ -181,9 +200,6 @@ class CbReport(object):
         :param strict: If True, raise exception on unknown fields instead of dropping them
         :param kwargs: actual report data
         """
-        # internal data
-        self._data: Dict[str, Union[str, int, float, Dict]] = {}
-
         # negative scores introduced in CB 4.2
         # negative scores indicate a measure of "goodness" versus "badness"
         self.allow_negative_scores = allow_negative_scores
@@ -201,7 +217,7 @@ class CbReport(object):
         self.optional = ["tags", "description"]
 
         # valid IOC types are "md5", "ipv4", "dns", "query"
-        self.valid_ioc_types = ["md5", "sha256", "ipv4", "ipv6", "dns", "event_query", "ja3", "ja3s"]
+        self.valid_ioc_types = ["md5", "sha256", "ipv4", "ipv6", "dns", "query", "ja3", "ja3s"]
 
         # valid index_type options for "query" IOC
         self.valid_query_ioc_types = ["events", "modules"]
@@ -213,7 +229,7 @@ class CbReport(object):
             kwargs["timestamp"] = int(time.mktime(time.gmtime()))
 
         self.strict = strict
-        self._rid = f"Report '" + f"{kwargs.get('id', '???')}" + "'"
+        self._rid = f"Report '" + f"{kwargs.get('id', '???')}" + "'"  # for exception identification
 
         self.data = kwargs
         if validate:
@@ -241,36 +257,54 @@ class CbReport(object):
 
         :param new_data: new structure to update data with
         """
+        self._data = new_data
+
+        pruner = []
         for key, value in new_data.items():
-            if key in self.required or key in self.optional:
-                if key != "iocs":
-                    self._data[key] = value
+            if key not in self.required and key not in self.optional:
+                if self.strict:
+                    raise CbInvalidReport(f"Report includes unknown field: {key}")
                 else:
-                    self._data[key] = value
-                    if isinstance(value, Dict):
-                        for key2, value2 in value.items():
-                            if key2 == "event_query" and isinstance(value2, Dict):
-                                new_value = {}
-                                sanitized = {}
-                                for key3, value3 in value2.items():
-                                    if key3 in self.valid_query_fields:
-                                        sanitized[key3] = value3
-                                    elif self.strict:
+                    pruner.append(key)
+
+            # handle query dict
+            if key == "iocs":
+                if isinstance(value, Dict):
+                    for key2, value2 in value.items():
+                        if key2 == "query" and isinstance(value2, Dict):  # cope with bad data (for now)
+                            pruner2 = []
+                            for key3 in value2.keys():
+                                if key3 not in self.valid_query_fields:
+                                    if self.strict:
                                         raise CbInvalidReport(f"{self._rid}, field 'ioc' query includes"
                                                               f" unknown field: {key3}")
-                                new_value['event_query'] = sanitized
-                                self._data[key] = new_value
-            elif self.strict:
-                raise CbInvalidReport(f"Report includes unknown field: {key}")
+                                    else:
+                                        pruner2.append(key3)
+                            for item in pruner2:
+                                del self._data[key][key2][item]
+                                logger.debug(f"Pruned unknown query ioc field `{item}` from report")
+
+        for item in pruner:
+            del self._data[item]
+            logger.debug(f"Pruned unknown field `{item}` from feedinfo")
 
     # --------------------------------------------------
 
-    def validate(self) -> None:
+    def validate(self, strict: bool = None) -> None:
         """
         Perform a set of checks to validate report data.
 
+        :param strict: If True or False, changes srict setting of class; True raises exception on non-CB fields, False
+                       prunes them
         :raises: CbInvalidReport if there are validation problems
         """
+        if strict is not None:
+            if isinstance(strict, bool):
+                self.strict = strict
+            else:
+                raise TypeError("`strict` parameter must be a boolean")
+        self.data = self._data  # re-asess
+
         # validate we have all required keys
         if not all([x in self.data.keys() for x in self.required]):
             missing_fields = ", ".join(set(self.required).difference(set(self.data.keys())))
@@ -338,7 +372,7 @@ class CbReport(object):
             if key not in self.valid_ioc_types:
                 raise CbInvalidReport(f"{self._rid}, field 'iocs', unknown ioc '{key}'")
 
-            if key.lower() == "event_query":
+            if key.lower() == "query":
                 if not isinstance(item, Dict):
                     raise CbInvalidReport(f"{self._rid}, field 'iocs', ioc '{key}', is not a dictionary")
                 # NOTE: other query ioc testing below
@@ -353,20 +387,20 @@ class CbReport(object):
                             f"{self._rid}, field 'iocs', ioc '{key}', has non-str entry (({i}, type {type(i)})")
 
         # Let us check and make sure that for "query" ioc type does not contain other types of ioc
-        query_ioc = "event_query" in iocs.keys()
+        query_ioc = "query" in iocs.keys()
         if query_ioc:
             extras = []
             for key in iocs.keys():
-                if key not in ["event_query"]:
+                if key not in ["query"]:
                     extras.append(key)
             if len(extras) > 0:
                 raise CbInvalidReport(f"{self._rid}, field 'iocs', has extra keys: {extras}")
 
-            iocs_query = iocs["event_query"]  # for cleaner code
+            iocs_query = iocs["query"]  # for cleaner code
 
             # validate that the index_type field exists
             if "index_type" not in iocs_query.keys():
-                raise CbInvalidReport(f"{self._rid}, field 'iocs', 'event_query' section missing 'index_type'")
+                raise CbInvalidReport(f"{self._rid}, field 'iocs', 'query' section missing 'index_type'")
 
             # validate that the index_type is a valid value
             if not iocs_query.get("index_type", None) in self.valid_query_ioc_types:
@@ -375,7 +409,7 @@ class CbReport(object):
 
             # validate that the search_query field exists
             if "search_query" not in iocs_query.keys():
-                raise CbInvalidReport(f"{self._rid}, field 'iocs', 'event_query' section missing 'search_query'")
+                raise CbInvalidReport(f"{self._rid}, field 'iocs', 'query' section missing 'search_query'")
 
             # validate that the search_query field is at least minimally valid
             # in particular, we are looking for a "q=" (process) or "cb.q.????=" (binary)
@@ -383,7 +417,7 @@ class CbReport(object):
             # against leaving the actual query unqualified
             for item in iocs_query["search_query"]:
                 if "q=" not in item and "cb.q." not in item:
-                    raise CbInvalidReport(f"{self._rid}, field 'iocs', 'event_query' has bad 'search_query': {item}")
+                    raise CbInvalidReport(f"{self._rid}, field 'iocs', 'query' has bad 'search_query': {item}")
 
                 for kvpair in item.split('&'):
                     if len(kvpair.split('=')) != 2:
@@ -470,7 +504,7 @@ class CbReport(object):
         # no logic to detect unescaped '%' characters
         for c in q:
             if c not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~%*()":
-                raise CbInvalidReport(f"{self._rid}, field 'iocs', 'event_query' has unescaped non-reserved character "
+                raise CbInvalidReport(f"{self._rid}, field 'iocs', 'query' has unescaped non-reserved character "
                                       f"'{c}' found in query; use percent-encoding")
 
 
@@ -599,8 +633,8 @@ class CbFeed(object):
                 yield {"type": "ja3", "ioc": ja3, "report_id": report.get("id", "")}
             for ja3s in report.get("iocs", {}).get("ja3s", []):
                 yield {"type": "ja3s", "ioc": ja3s, "report_id": report.get("id", "")}
-            for query in report.get("iocs", {}).get("event_query", {}).get("search_query", {}):
-                yield {"type": "event_query", "ioc": query, "report_id": report.get("id", "")}
+            for query in report.get("iocs", {}).get("query", {}).get("search_query", {}):
+                yield {"type": "query", "ioc": query, "report_id": report.get("id", "")}
 
     @staticmethod
     def validate_report_list(reports: List[Dict[str, Any]]) -> None:
