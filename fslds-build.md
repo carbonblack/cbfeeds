@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.org/fslds/cbfeeds.svg?branch=python3-constr-validation)](https://travis-ci.org/fslds/cbfeeds) 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 python-cbfeeds
 """
@@ -6,7 +7,7 @@ from setuptools import setup
 
 setup(
     name='cbfeeds',
-    version='0.8.0',
+    version='1.0.0',
     url='http://github.com/carbonblack/cbfeeds',
     license='MIT',
     author='Carbon Black',
@@ -24,5 +25,8 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ], requires=['requests']
+    ],
+    scripts=['validate_feed.py'],
+    requires=['requests']
+
 )

@@ -1,3 +1,7 @@
+#  coding: utf-8
+#  Carbon Black EDR Copyright © 2013-2020 VMware, Inc. All Rights Reserved.
+################################################################################
+
 import sys
 import os
 import time
@@ -100,7 +104,7 @@ def create():
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print "usage: generate_abuse.ch_feed.py [outfile]"
+        print("usage: generate_abuse.ch_feed.py [outfile]")
         sys.exit()
 
     feed_created = create()

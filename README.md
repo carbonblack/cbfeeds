@@ -1,5 +1,6 @@
 # Carbon Black Feeds [![Build Status](https://travis-ci.org/carbonblack/cbfeeds.svg?branch=master)](https://travis-ci.org/carbonblack/cbfeeds) 
 
+
 ## License
 
 Use of the Carbon Black Feeds API is governed by the license found in LICENSE.md.
@@ -28,6 +29,15 @@ The CB Response 5.0+ server adds support for two new types of indicators:
 The CB Response 6.1+ server adds support for one new type of indicator:
 
   * IPv6 addresses
+  
+The CB Response 7.0+ server adds support for one new type of indicator:
+
+  * Binary SHA-256
+  
+The CB Response 7.3+ server adds support for two new types of indicator:
+
+  * Ja3 hash
+  * Ja3s hash
 
 Please note that query IOC types have significant differences as compared to MD5s, IPv4 and IPv6 addresses, and DNS names.  Please see notes below regarding their usage.
 
@@ -35,6 +45,8 @@ The feed format, described in the "Feed Structure" section below, is designed fo
 easy to add support for feed data from any input source.
 
 Example feed creation scripts are included.  See the 'Examples' section in this document for a listing of the examples.
+
+> _**NOTE:** As of this version, python 3 is a requirement._
 
 ## Using the Carbon Black Feeds API
 
@@ -109,20 +121,22 @@ Each `report` has report metadata and a list of IOCs.
 
 `feedinfo` is a JSON structure with the following entries:
 
-| name           | status   | description | 
-| -------------- | -------- |-------------| 
-| `name`         | REQUIRED | Internal name; must not include spaces or special characters.  See Notes. | 
-| `display_name` | REQUIRED | Display name for the user interface. | 
-| `provider_url` | REQUIRED | Human-consumpable link to view more information about this feed. | 
-| `summary`      | REQUIRED | A short description of this feed. | 
-| `tech_data`    | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
-| `icon`         | OPTIONAL | A base64 encoded version of the image to use in the user interface | 
-| `icon_small`   | OPTIONAL | A base64 encoded version of a smaller icon | 
-| `category`     | OPTIONAL | Category of the feed i.e. Open Source, Partner, Connector, First Party etc. |
+| name             | status   | description | 
+| ---------------- | -------- |-------------| 
+| `display_name`   | REQUIRED | Display name for the user interface. | 
+| `name`           | REQUIRED | Internal name; must not include spaces or special characters.  See Notes. | 
+| `provider_url`   | REQUIRED | Human-consumpable link to view more information about this feed. | 
+| `summary`        | REQUIRED | A short description of this feed. | 
+| `tech_data`      | REQUIRED | More detailed technical description, to include data sharing requirements (if any) | 
+| `category`       | _OPTIONAL_ | Category of the feed i.e. Open Source, Partner, Connector, First Party etc. |
+| `icon`           | _OPTIONAL_ | A base64 encoded version of the image to use in the user interface | 
+| `icon_small`     | _OPTIONAL_ | A base64 encoded version of a smaller icon | 
+| `provider_rating`| _OPTIONAL_ | Provider rating for the feed. |
+| `version`        | _OPTIONAL_ | Version of the feed source. |
 
 Notes:
 
-The 'name' field must not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
+The 'name' field cannot not include spaces or special characters.  Typically, it should be unique per-feed on a single server.  
 
 #### Icon
 
@@ -136,15 +150,15 @@ Explanation of `category` parameters:
 
 | Category Name | Description |
 | ------------- | ----------- |
-| `Partner`     | Proprietary threat intelligence provided to the Threat Intelligence Cloud via a partner agreement. | 
-| `Open Source` | Open Source intelligence that is generally available to the public | 
+| `Carbon Black` | Intelligence based on output from host-based integrations | 
 | `Carbon Black First Party` | Intelligence generated inside the Threat Intelligence Cloud by the Carbon Black Research team | 
 | `Connectors` | Intelligence connectors from third party technologies Carbon Black have integrated with | 
-| `Carbon Black` | Intelligence based on output from host-based integrations | 
 | `Meta-feed` | Includes a theme-based aggregate of selected intelligence indicators from other feeds |
+| `Partner`     | Proprietary threat intelligence provided to the Threat Intelligence Cloud via a partner agreement. | 
+| `Open Source` | Open Source intelligence that is generally available to the public | 
 
 
-An example `feedinfo` structure, from the generate_tor_feed.py script:
+An example `feedinfo` structure, from the `generate_tor_feed.py` script:
 
 ```
   "feedinfo": {
@@ -165,14 +179,14 @@ A `report` is a JSON structure with the following entries:
 
 | name           | status   | description | 
 | -------------- | -------- |-------------| 
-| `timestamp`    | REQUIRED | Time this report was last updated, in seconds since epoch (GMT).  This should always be updated whenever the content of the report changes.| 
 | `id`           | REQUIRED | A report id, must be unique per feed `name` for the lifetime of the feed.  Must be alphanumeric (including no spaces).| 
-| `link`         | REQUIRED | Human-consumbable link to information about this report.| 
-| `title`        | REQUIRED | A one-line title describing this report.| 
-| `score`        | REQUIRED | The severity of this report from -100 to 100, with 100 most critical.| 
 | `iocs`         | REQUIRED | The IOCs for this report.  A match on __any__ IOC will cause the activity to be tagged with this report id.  The IOC format is described below.| 
-| `tags`         | OPTIONAL | A comma separated list of identifiers to tag the report. |
-| `description`  | OPTIONAL | A description of the report. |
+| `link`         | REQUIRED | Human-consumbable link to information about this report.| 
+| `score`        | REQUIRED | The severity of this report from -100 to 100, with 100 most critical.| 
+| `timestamp`    | REQUIRED | Time this report was last updated, in seconds since epoch (GMT).  This should always be updated whenever the content of the report changes.| 
+| `title`        | REQUIRED | A one-line title describing this report.| 
+| `description`  | _OPTIONAL_ | A description of the report. |
+| `tags`         | _OPTIONAL_ | A comma separated list of identifiers to tag the report. |
 
 ### iocs
 
@@ -190,15 +204,27 @@ CB Response 6.1+ supports all 5.0 IOCs and adds one additional type:
 
 * ipv6 addresses
 
+The CB Response 7.0+ server adds support for one new type of indicator:
+
+  * Binary SHA-256
+  
+The CB Response 7.3+ server adds support for two new types of indicator:
+
+  * Ja3 hash
+  * Ja3s hash
+
 `iocs` is a structure with one or more of these entries:
 
 | name           | status   | description | 
 | -------------- | -------- |-------------| 
-| `ipv4`         | OPTIONAL | A list of IPv4 addresses in dotted decimal form|
-| `ipv6`         | OPTIONAL | A list of IPv6 addresses|
-| `dns`          | OPTIONAL | A list of domain names| 
-| `md5`          | OPTIONAL | A list of md5s|
-| `query`        | OPTIONAL | A query of type "events" or "modules"| 
+| `dns`          | _OPTIONAL_ | A list of domain names| 
+| `ipv4`         | _OPTIONAL_ | A list of IPv4 addresses in dotted decimal form|
+| `ipv6`         | _OPTIONAL_ | A list of IPv6 addresses|
+| `ja3`          | _OPTIONAL_ | A list of ja3 hashes (md5)|
+| `ja3s`         | _OPTIONAL_ | A list of ja3s hashes (md5)|
+| `md5`          | _OPTIONAL_ | A list of md5s|
+| `query`        | _OPTIONAL_ | A query of type "events" or "modules"| 
+| `sha256`       | _OPTIONAL_ | A list of sha-256s|
 
 An example `reports` list with two `report` structures, each with one IPv4 IOC, from the example_tor.py script:
 
