@@ -1,0 +1,10 @@
+# cbfeeds requirements file
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
+# If changes to this file are made, use `pip-compile -U -q requirements.in` at the
+# command line from within the repository root folder.
+#
+# NOTE: When compiled, you need to remove the line:
+#   --index-url https://artifactory-pub.bit9.local/artifactory/api/pypi/pypi-virtual/simple
+################################################################################
+
+requests>=1.2.3
