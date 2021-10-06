@@ -64,7 +64,7 @@ def build_reports(options):
             # parsed as an ipv4 address!
             #
             ips.append(raw_ioc)
-        except Exception, e:
+        except Exception as e:
 
             # attept to parse the line as a md5 and, if that fails,
             # as a domain.  use trivial parsing
@@ -192,7 +192,7 @@ if __name__ == "__main__":
        not options.techdata or \
        not options.ioc_filename or \
        not options.report:
-        print "-> Missing option"
+        print("-> Missing option")
         sys.exit(0)
 
-    print create_feed(options)
+    print((create_feed(options)))

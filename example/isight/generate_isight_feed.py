@@ -56,7 +56,7 @@ def retrieve_report_score(report_name, api, default_score):
         if field.tag != "Field":
             continue
         if field.attrib['name'] == 'Risk Rating': 
-            if score_stats.has_key(field.text.strip()):
+            if field.text.strip() in score_stats:
                 score_stats[field.text.strip()] = score_stats[field.text.strip()] + 1
             else:
                 score_stats[field.text.strip()] = 1
@@ -69,15 +69,15 @@ def retrieve_report_score(report_name, api, default_score):
             elif 'LOW' == rating:
                 return 60
             else:
-                print "WARNING: can't find score for %s; using default" % report_name
+                print(("WARNING: can't find score for %s; using default" % report_name))
                 return default_score 
 
-    if score_stats.has_key("MISSING"):
+    if "MISSING" in score_stats:
         score_stats["MISSING"] = score_stats["MISSING"] + 1
     else:
         score_stats["MISSING"] = 1
 
-    print "WARNING: can't find score for %s; using default" % report_name
+    print(("WARNING: can't find score for %s; using default" % report_name))
     return default_score 
 
 def generate_reports(raw, api):
@@ -90,7 +90,7 @@ def generate_reports(raw, api):
 
     reports = []
 
-    for rawkey in raw.keys():
+    for rawkey in list(raw.keys()):
 
         entry = {}
 
@@ -191,7 +191,7 @@ def create(config_file, existing_csv=None, reports_to_skip=[]):
              'ipaddr' : {'total' : 0, 'max' : 0}, 
              'domain' : {'total' : 0, 'max' : 0}}
 
-    for report_id in results.keys():
+    for report_id in list(results.keys()):
         stats['md5']['total'] += len(results[report_id]['md5'])
         if len(results[report_id]['md5']) > stats['md5']['max']:
             stats['md5']['max'] = len(results[report_id]['md5'])
@@ -244,7 +244,7 @@ def create(config_file, existing_csv=None, reports_to_skip=[]):
 if __name__ == "__main__":
     #print "-> iSIGHT Partners Carbon Black feed generator"
     if len(sys.argv) < 3:
-        print "\n   USAGE: generate_isight_feed.py <configfile> <outputfile> [existing_csv]\n"
+        print("\n   USAGE: generate_isight_feed.py <configfile> <outputfile> [existing_csv]\n")
         sys.exit(0) 
     cfg = sys.argv[1] 
     out = sys.argv[2]

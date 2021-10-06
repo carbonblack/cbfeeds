@@ -2,7 +2,7 @@
 import csv
 import time
 
-def remove_non_ascii(s): return "".join(filter(lambda x: ord(x)<128, s))
+def remove_non_ascii(s): return "".join([x for x in s if ord(x)<128])
 
 def get_field(row, field_name, do_remove_non_ascii=False):
     val = row.get(field_name) or row.get(field_name.lower())
@@ -21,7 +21,7 @@ def isight_csv_to_iocs_dict(isight_csv_entries):
     """
     iocs_by_report_dict = {}
     if not isight_csv_entries:
-        print "no entries provided"
+        print("no entries provided")
         return iocs_by_report_dict
 
     reports = []
@@ -45,7 +45,7 @@ def isight_csv_to_iocs_dict(isight_csv_entries):
             i = i + 1
 
             if not report_id:
-                print("Report did not have a report_id: %s" % title)
+                print(("Report did not have a report_id: %s" % title))
                 continue
 
             # @todo consider using 'Related_Domains'
@@ -60,7 +60,7 @@ def isight_csv_to_iocs_dict(isight_csv_entries):
             md5s = set()
             domains = set()
 
-            if iocs_by_report_dict.has_key(tup):
+            if tup in iocs_by_report_dict:
                 ips = set(iocs_by_report_dict[tup]['ipaddr'])
                 md5s = set(iocs_by_report_dict[tup]['md5'])
                 domains = set(iocs_by_report_dict[tup]['domain'])

@@ -117,7 +117,7 @@ def parse_observables(observables):
         try:
             merge(iocs, parse_observable(observable))
         except Exception as e:
-            print("-> Unexpected error parsing observable: {0}; continuing.".format(e))
+            print(("-> Unexpected error parsing observable: {0}; continuing.".format(e)))
 
     return iocs
 
@@ -151,11 +151,11 @@ def build_report(fname):
               'title': pkg.stix_header.title,
               }
 
-    if len(iocs.keys()) == 0 or all(len(iocs[k]) == 0 for k in iocs):
-        print("-> No suitable observables found in {0}; skipping.".format(fname))
+    if len(list(iocs.keys())) == 0 or all(len(iocs[k]) == 0 for k in iocs):
+        print(("-> No suitable observables found in {0}; skipping.".format(fname)))
         return None
 
-    print("-> Including %s observables from {0}.".format(sum(len(iocs[k]) for k in iocs), fname))
+    print(("-> Including %s observables from {0}.".format(sum(len(iocs[k]) for k in iocs), fname)))
     return CbReport(**fields)
 
 
@@ -200,12 +200,12 @@ def build_reports(input_source):
                     rep = build_report(os.path.join(root, f))
                     if rep: reports.append(rep)
                 except UnsupportedVersionError as e:
-                    print("-> Skipping {0}\n"
+                    print(("-> Skipping {0}\n"
                           "UnsupportedVersionError: {1}\n"
                           "see https://github.com/STIXProject/python-stix/issues/124".format(
-                        f, e))
+                        f, e)))
                 except Exception as e:
-                    print("-> Unexpected error parsing {0}: {1}; skipping.".format(f, e))
+                    print(("-> Unexpected error parsing {0}: {1}; skipping.".format(f, e)))
 
     return reports
 
