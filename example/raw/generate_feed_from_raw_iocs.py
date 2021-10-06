@@ -41,7 +41,7 @@ def build_reports(options):
     # read all of the lines (of text) from the provided
     # input file (of IOCs)
     # 
-    raw_iocs = open(options.ioc_filename).readlines()
+    raw_iocs = open(options.ioc_filename, encoding='utf-8').readlines()
     
     # iterate over each of the lines
     # attempt to determine if each line is a suitable
@@ -115,14 +115,14 @@ def create_feed(options):
     # include in the feed information
     # 
     if options.icon:
-        bytes = base64.b64encode(open(options.icon).read())
+        bytes = base64.b64encode(open(options.icon,'b').read())
         feedinfo['icon'] = bytes 
     
     # if a small icon was provided, encode as base64 and 
     # include in the feed information
     #
     if options.small_icon:
-        bytes = base64.b64encode(open(options.small_icon).read())
+        bytes = base64.b64encode(open(options.small_icon, 'b').read())
         feedinfo['icon_small'] = bytes
   
     # if a feed category was provided, include it in the feed information
