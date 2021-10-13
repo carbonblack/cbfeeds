@@ -26,7 +26,7 @@ def gen_report_id(iocs):
     iocs.sort()
 
     for ioc in iocs:
-        md5.update(ioc.strip())
+        md5.update(ioc.strip().encode("utf-8"))
 
     return md5.hexdigest()
 
@@ -115,15 +115,15 @@ def create_feed(options):
     # include in the feed information
     # 
     if options.icon:
-        bytes = base64.b64encode(open(options.icon,'b').read())
-        feedinfo['icon'] = bytes 
+        bytes = base64.b64encode(open(options.icon,'rb').read())
+        feedinfo['icon'] = bytes.decode("utf-8")
     
     # if a small icon was provided, encode as base64 and 
     # include in the feed information
     #
     if options.small_icon:
-        bytes = base64.b64encode(open(options.small_icon, 'b').read())
-        feedinfo['icon_small'] = bytes
+        bytes = base64.b64encode(open(options.small_icon, 'rb').read())
+        feedinfo['icon_small'] = bytes.decode('utf-8')
   
     # if a feed category was provided, include it in the feed information
     #
