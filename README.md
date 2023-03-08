@@ -61,10 +61,17 @@ defined in the "Feed Structure" section below.
 
 ### Getting started with CBFAPI
 
-#### install git as needed
+#### Ensure Python3.x and pip3 are installed:
+    root@localhost carbonblack]# python --version
+    root@localhost carbonblack]# pip3 --version
+
+#### Installation instructions/guidance
 
     [root@localhost carbonblack]# yum install git
-    ...
+    [root@localhost carbonblack]# yum install centos-release-scl -y
+    [root@localhost carbonblack]# yum install rh-python38
+    [root@localhost carbonblack]# scl enable rh-python38 bash
+    [root@localhost carbonblack]# yum install pip3
 
 #### clone the github cbfeed repository:
 
@@ -85,6 +92,12 @@ defined in the "Feed Structure" section below.
     [root@localhost cbfeeds]# ls
     cbfeeds/  LICENSE.md               README.md         setup.py  validate_feed.py
     example/  percent_encode_query.py  requirements.txt  test.py
+
+#### Install requirements:
+    [root@localhost carbonblack]# pip3 install -r cbfeeds/requirements.txt 
+
+#### Run the setup.py file to install cbfeeds module.
+    [root@localhost carbonblack]# python cbfeeds/setup.py
 
 #### Navigate to the example directory and use the example `generate_tor_feed.py` (inside the example/tor/ directory) script to generate a feed from live tor egress IPs
 
