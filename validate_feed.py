@@ -91,7 +91,7 @@ def validate_feed(feed: Dict[str, Any], pedantic: bool = False) -> cbfeeds.CbFee
         raise cbfeeds.CbException("No 'reports' element found!")
 
     # Create the cbfeed object
-    feed = cbfeeds.CbFeed(feed["feedinfo"], feed["reports"], strict=pedantic)
+    feed = cbfeeds.CbFeed(feed["feedinfo"], feed["reports"])
 
     # Validate the feed -- this validates that all required fields are present, and that
     #    all required values are within valid ranges
