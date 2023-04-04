@@ -40,3 +40,4 @@ nosetests.xml
 
 # Test Feeds
 *.feed
+.DS_Store
