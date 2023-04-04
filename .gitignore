@@ -39,5 +39,5 @@ nosetests.xml
 
 
 # Test Feeds
-*.feed.DS_Store
+*.feed
 .DS_Store
